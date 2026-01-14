@@ -97,11 +97,10 @@ export default function Hero() {
               & Designer
             </h1>
             {/* Decal Icon */}
-            <div className="hero-icon absolute -bottom-4 md:-bottom-9 right-0 md:-right-24 pointer-events-none text-white mix-blend-difference group">
+            <div className="hero-icon absolute -bottom-4 md:-bottom-8 right-0 md:-right-24 pointer-events-none text-white mix-blend-difference group">
               <PenTool
-                size={60}
-                strokeWidth={0.5}
-                className="w-12 h-12 md:w-20 md:h-20 lg:w-24 lg:h-24 opacity-40 transform -rotate-12 group-hover:rotate-0 transition-transform duration-700"
+                strokeWidth={0.8}
+                className="size-12 md:size-20 opacity-40 transform -rotate-12 group-hover:rotate-0 transition-transform duration-700"
               />
             </div>
           </div>
