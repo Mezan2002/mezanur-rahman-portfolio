@@ -49,22 +49,21 @@ export default function Services() {
   useGSAP(
     () => {
       const runAnimations = () => {
+        // Set initial states immediately to prevent flicker
+        gsap.set(".service-card", { y: 50, opacity: 0 });
+
         // Reveal each service card
-        gsap.fromTo(
-          ".service-card",
-          { y: 50, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            stagger: 0.15,
-            duration: 0.3,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: ".services-grid",
-              start: "top 75%",
-            },
-          }
-        );
+        gsap.to(".service-card", {
+          y: 0,
+          opacity: 1,
+          stagger: 0.15,
+          duration: 0.3,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: ".services-grid",
+            start: "top 75%",
+          },
+        });
       };
 
       if (window.isPageReady) {
@@ -91,7 +90,7 @@ export default function Services() {
         </span>
       </div>
 
-      <div className="max-w-[1600px] mx-auto relative z-10">
+      <div className="relative z-10">
         {/* Header - EXACT MATCH to Projects section style */}
         <div className="mb-24 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8">
           <div className="">

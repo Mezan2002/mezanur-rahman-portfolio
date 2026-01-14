@@ -19,10 +19,9 @@ export default function ClientLayout({ children }) {
   return (
     <>
       <Preloader />
-      {/* <ScrollProgress /> - Removed for cleaner look */}
       <NoiseOverlay />
-      <Navbar />
       <main>
+        <Navbar />
         {children}
         <Footer />
       </main>

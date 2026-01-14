@@ -1,9 +1,14 @@
 // components/CustomCursor.jsx
 "use client";
 
+import gsap from "gsap";
 import { memo, useEffect, useRef, useState } from "react";
 
-import { DEFAULT_EMOJI, INTERACTIVE_SELECTORS } from "@/config/cursorConfig";
+import {
+  CURSOR_VARIANTS,
+  DEFAULT_EMOJI,
+  INTERACTIVE_SELECTORS,
+} from "@/config/cursorConfig";
 
 import { useCursorAnimation } from "@/hooks/cursor/useCursorAnimation";
 import { useCursorEmoji } from "@/hooks/cursor/useCursorEmoji";
@@ -11,16 +16,71 @@ import { useCursorEvents } from "@/hooks/cursor/useCursorEvents";
 import { useCursorPosition } from "@/hooks/cursor/useCursorPosition";
 import { useCursorSound } from "@/hooks/cursor/useCursorSound";
 
+import CrosshairCursor from "@/components/cursor/CrosshairCursor";
 import CursorEmoji from "@/components/cursor/CursorEmoji";
-import CursorRipple from "@/components/cursor/CursorRipple";
+import GlowCursor from "@/components/cursor/GlowCursor";
+import PremiumCursor from "@/components/cursor/PremiumCursor";
 
 const CustomCursor = memo(() => {
   const cursorRef = useRef(null);
+  const [isEnabled, setIsEnabled] = useState(true);
+  const [variant, setVariant] = useState(CURSOR_VARIANTS.EMOJI);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    const savedEnabled = localStorage.getItem("customCursorEnabled");
+    if (savedEnabled !== null) {
+      setIsEnabled(savedEnabled !== "false");
+    }
+    const savedVariant = localStorage.getItem("cursorVariant");
+    if (savedVariant) {
+      setVariant(savedVariant);
+    }
+  }, []);
   const [emoji, setEmoji] = useState(DEFAULT_EMOJI);
   const [isHovering, setIsHovering] = useState(false);
   const [isClicking, setIsClicking] = useState(false);
   const [showRipple, setShowRipple] = useState(false);
   const [ripplePos, setRipplePos] = useState({ x: 0, y: 0 });
+
+  // Manage Global CSS State - useLayoutEffect to prevent flicker
+  useEffect(() => {
+    if (isEnabled) {
+      document.documentElement.classList.add("has-custom-cursor");
+    } else {
+      document.documentElement.classList.remove("has-custom-cursor");
+    }
+    return () => document.documentElement.classList.remove("has-custom-cursor");
+  }, [isEnabled]);
+
+  // Cursor Toggle & Variant Handler
+  useEffect(() => {
+    const handleToggle = (e) => {
+      const isNowEnabled = e.detail.enabled;
+      setIsEnabled(isNowEnabled);
+
+      if (isNowEnabled) {
+        setEmoji(DEFAULT_EMOJI);
+        setIsHovering(false);
+        setIsClicking(false);
+        setShowRipple(false);
+      } else if (cursorRef.current) {
+        gsap.set(cursorRef.current, { clearProps: "all" });
+      }
+    };
+
+    const handleVariantChange = (e) => {
+      setVariant(e.detail.variant);
+    };
+
+    window.addEventListener("toggleCustomCursor", handleToggle);
+    window.addEventListener("changeCursorVariant", handleVariantChange);
+    return () => {
+      window.removeEventListener("toggleCustomCursor", handleToggle);
+      window.removeEventListener("changeCursorVariant", handleVariantChange);
+    };
+  }, []);
 
   // Custom hooks
   const { playSound } = useCursorSound();
@@ -63,6 +123,7 @@ const CustomCursor = memo(() => {
 
   // Setup event listeners
   useEffect(() => {
+    if (!isEnabled) return;
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
     window.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("mouseup", handleMouseUp);
@@ -114,6 +175,7 @@ const CustomCursor = memo(() => {
       observer.disconnect();
     };
   }, [
+    isEnabled,
     handleMouseMove,
     handleMouseDown,
     handleMouseUp,
@@ -125,16 +187,34 @@ const CustomCursor = memo(() => {
     handleMouseLeave,
   ]);
 
-  return (
-    <>
-      <CursorEmoji
-        cursorRef={cursorRef}
-        emoji={emoji}
-        isClicking={isClicking}
-      />
-      {showRipple && <CursorRipple x={ripplePos.x} y={ripplePos.y} />}
-    </>
-  );
+  if (!isMounted || !isEnabled) return null;
+
+  const renderCursor = () => {
+    switch (variant) {
+      case CURSOR_VARIANTS.EMOJI:
+        return (
+          <CursorEmoji
+            cursorRef={cursorRef}
+            emoji={emoji}
+            isClicking={isClicking}
+          />
+        );
+      case CURSOR_VARIANTS.PREMIUM:
+        return (
+          <PremiumCursor isHovering={isHovering} isClicking={isClicking} />
+        );
+      case CURSOR_VARIANTS.GLOW:
+        return <GlowCursor isHovering={isHovering} />;
+      case CURSOR_VARIANTS.CROSSHAIR:
+        return (
+          <CrosshairCursor isHovering={isHovering} isClicking={isClicking} />
+        );
+      default:
+        return null;
+    }
+  };
+
+  return <>{renderCursor()}</>;
 });
 
 CustomCursor.displayName = "CustomCursor";

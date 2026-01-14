@@ -57,13 +57,17 @@ export default function Projects() {
       const runAnimations = () => {
         const items = gsap.utils.toArray(".project-grid-item");
 
+        // Set initial states immediately to prevent flicker
+        gsap.set(items, { y: 60, opacity: 0 });
+        gsap.set(".header-fade-in", { opacity: 0, y: 30 });
+
         items.forEach((item) => {
           const q = gsap.utils.selector(item);
 
           // Card Entrance
-          gsap.from(item, {
-            y: 60,
-            opacity: 0,
+          gsap.to(item, {
+            y: 0,
+            opacity: 1,
             duration: 1.2,
             ease: "power3.out",
             scrollTrigger: {
@@ -86,9 +90,9 @@ export default function Projects() {
         });
 
         // Header reveal
-        gsap.from(".header-fade-in", {
-          opacity: 0,
-          y: 30,
+        gsap.to(".header-fade-in", {
+          opacity: 1,
+          y: 0,
           duration: 1.5,
           ease: "power2.out",
           scrollTrigger: {
@@ -115,7 +119,7 @@ export default function Projects() {
       id="work"
       className="bg-dark-background py-40 border-t border-white/5"
     >
-      <div className="max-w-[1500px] mx-auto px-6 md:px-12">
+      <div className="px-6 md:px-12">
         {/* Minimalist Header */}
         <div className="header-fade-in mb-32 md:mb-48 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-12">
           <div className="space-y-6">

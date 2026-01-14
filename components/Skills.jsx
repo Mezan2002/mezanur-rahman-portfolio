@@ -19,7 +19,7 @@ const skills = [
 
 export default function Skills() {
   return (
-    <section className="py-24 bg-dark-background border-y border-white/5 overflow-hidden relative">
+    <section className="py-10 bg-dark-background border-y border-white/5 overflow-hidden relative">
       <div className="relative flex overflow-x-hidden">
         {/* First Marquee */}
         <div className="py-6 animate-marquee-super-slow whitespace-nowrap flex items-center">

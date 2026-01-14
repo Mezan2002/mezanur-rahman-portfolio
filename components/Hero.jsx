@@ -2,6 +2,7 @@
 
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { PenTool } from "lucide-react";
 import { useRef } from "react";
 
 export default function Hero() {
@@ -9,33 +10,45 @@ export default function Hero() {
 
   useGSAP(
     () => {
+      // Set initial states immediately to prevent flicker
+      gsap.set(".hero-text", {
+        y: 80,
+        rotateX: -45,
+        opacity: 0,
+        filter: "blur(10px)",
+      });
+      gsap.set(".hero-icon", { scale: 0, opacity: 0, rotate: -20 });
+      gsap.set(".scroll-indicator", { y: -10, opacity: 0 });
+
       const runAnimation = () => {
         const tl = gsap.timeline({ delay: 0.2 });
 
         // Staggered reveal for text
-        tl.fromTo(
-          ".hero-text",
-          {
-            y: 80,
-            rotateX: -45,
-            opacity: 0,
-            filter: "blur(10px)",
-          },
-          {
-            y: 0,
-            rotateX: 0,
-            opacity: 1,
-            filter: "blur(0px)",
-            stagger: 0.1,
-            duration: 1.2,
-            ease: "power4.out",
-          }
-        ).fromTo(
-          ".scroll-indicator",
-          { y: -10, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.8, ease: "power2.out" },
-          "-=0.5"
-        );
+        tl.to(".hero-text", {
+          y: 0,
+          rotateX: 0,
+          opacity: 1,
+          filter: "blur(0px)",
+          stagger: 0.1,
+          duration: 1.2,
+          ease: "power4.out",
+        })
+          .to(
+            ".hero-icon",
+            {
+              scale: 1,
+              opacity: 0.4,
+              rotate: 0,
+              duration: 1,
+              ease: "back.out(1.7)",
+            },
+            "-=0.8"
+          )
+          .to(
+            ".scroll-indicator",
+            { y: 0, opacity: 1, duration: 0.8, ease: "power2.out" },
+            "-=0.5"
+          );
       };
 
       if (window.isPageReady) {
@@ -76,13 +89,21 @@ export default function Hero() {
           </div>
 
           {/* Line 3 - Outlined */}
-          <div className="overflow-hidden">
+          <div className="relative">
             <h1
               className="hero-text inline-block text-[15vw] md:text-[12vw] font-black font-syne text-transparent uppercase tracking-tighter hover:text-white/10 transition-colors duration-500 cursor-default"
               style={{ WebkitTextStroke: "2px rgba(255, 255, 255, 0.3)" }}
             >
               & Designer
             </h1>
+            {/* Decal Icon */}
+            <div className="hero-icon absolute -bottom-4 md:-bottom-9 right-0 md:-right-24 pointer-events-none text-white mix-blend-difference group">
+              <PenTool
+                size={60}
+                strokeWidth={0.5}
+                className="w-12 h-12 md:w-20 md:h-20 lg:w-24 lg:h-24 opacity-40 transform -rotate-12 group-hover:rotate-0 transition-transform duration-700"
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -13,7 +13,7 @@ export default function Template({ children }) {
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ paused: true });
+      const tl = gsap.timeline();
 
       // Columns Reveal (Slide Up)
       tl.to(".transition-column", {

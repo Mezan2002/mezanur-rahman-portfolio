@@ -98,12 +98,15 @@ export default function Testimonials() {
         );
         if (!cards || cards.length === 0) return;
 
+        // Set initial states immediately to prevent flicker
+        gsap.set(cards, { y: 60, opacity: 0 });
+
         // Ensure all triggers are refreshed before we calculate positions
         ScrollTrigger.refresh();
 
-        gsap.from(cards, {
-          y: 60,
-          opacity: 0,
+        gsap.to(cards, {
+          y: 0,
+          opacity: 1,
           stagger: 0.1,
           duration: 1.2,
           ease: "power4.out",
@@ -165,7 +168,7 @@ export default function Testimonials() {
       {/* Gradient overlay for consistency */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.03)_0%,transparent_70%)] pointer-events-none"></div>
 
-      <div className="max-w-7xl mx-auto relative z-10">
+      <div className="relative z-10">
         {/* Header - EXACT MATCH with Navigation Arrows */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 mb-24">
           <div className="flex-1">

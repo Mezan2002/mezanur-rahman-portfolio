@@ -305,7 +305,7 @@ section {
 
 /* Custom Cursor (Desktop Only) */
 @media (min-width: 768px) {
-  * {
+  .has-custom-cursor * {
     cursor: none !important;
   }
 }
@@ -388,13 +388,17 @@ section {
   animation: spin 8s linear infinite;
 }
 
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
+@keyframes scan {
+  0% {
+    transform: translateY(-100%);
   }
-  to {
-    transform: rotate(360deg);
+  100% {
+    transform: translateY(100%);
   }
+}
+
+.animate-scan {
+  animation: scan 4s linear infinite;
 }
 
 /* Utilities */

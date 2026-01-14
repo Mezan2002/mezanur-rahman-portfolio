@@ -2,6 +2,7 @@
 "use client";
 
 import About from "@/components/About";
+import CTA from "@/components/CTA";
 import Hero from "@/components/Hero";
 import Pricing from "@/components/Pricing";
 import Projects from "@/components/Projects";
@@ -19,6 +20,7 @@ export default function Home() {
       <Projects />
       <Pricing />
       <Testimonials />
+      <CTA />
     </main>
   );
 }

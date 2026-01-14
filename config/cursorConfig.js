@@ -65,4 +65,11 @@ export const INTERACTIVE_SELECTORS =
   ".project-card, .social-link, .magnetic-btn, .glass-card, " +
   '[data-cursor], [role="button"]';
 
+export const CURSOR_VARIANTS = {
+  EMOJI: "emoji",
+  PREMIUM: "premium",
+  GLOW: "glow",
+  CROSSHAIR: "crosshair",
+};
+
 export const DEFAULT_EMOJI = "👆";

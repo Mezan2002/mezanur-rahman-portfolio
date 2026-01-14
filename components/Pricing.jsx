@@ -68,22 +68,21 @@ export default function Pricing() {
   useGSAP(
     () => {
       const runAnimations = () => {
+        // Set initial states immediately to prevent flicker
+        gsap.set(".pricing-card", { y: 60, opacity: 0 });
+
         // Reveal pricing cards
-        gsap.fromTo(
-          ".pricing-card",
-          { y: 60, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            stagger: 0.2,
-            duration: 0.3,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top 70%",
-            },
-          }
-        );
+        gsap.to(".pricing-card", {
+          y: 0,
+          opacity: 1,
+          stagger: 0.2,
+          duration: 0.3,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 70%",
+          },
+        });
       };
 
       if (window.isPageReady) {
@@ -106,7 +105,7 @@ export default function Pricing() {
       {/* Background gradients */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vh] bg-primary/5 rounded-full blur-[140px] pointer-events-none"></div>
 
-      <div className="max-w-[1400px] mx-auto relative z-10">
+      <div className="relative z-10">
         {/* Header - EXACT MATCH to Projects section style */}
         <div className="mb-24 text-center">
           <p className="text-gray-500 uppercase tracking-widest text-sm mb-4 font-mono">

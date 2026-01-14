@@ -1,169 +1,205 @@
 "use client";
 
+import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowRight, Code2, Rocket, Zap } from "lucide-react";
-import { useEffect, useRef } from "react";
-
-gsap.registerPlugin(ScrollTrigger);
+import { Code2, Compass, Layers } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 export default function About() {
-  const sectionRef = useRef(null);
+  const containerRef = useRef(null);
+  const [time, setTime] = useState("");
 
   useEffect(() => {
-    const runAnimations = () => {
-      const ctx = gsap.context(() => {
-        // Header Text Reveal
-        gsap.fromTo(
-          ".about-header-text",
-          { y: 100, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 1.2,
-            ease: "power4.out",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top 70%",
-            },
-          }
-        );
-
-        // Grid Reveal
-        gsap.fromTo(
-          ".swiss-card",
-          { y: 50, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            stagger: 0.1,
-            duration: 1,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: ".swiss-grid",
-              start: "top 80%",
-            },
-          }
-        );
-      }, sectionRef);
-
-      return () => ctx.revert();
+    const updateTime = () => {
+      setTime(
+        new Date().toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        })
+      );
     };
-
-    if (window.isPageReady) {
-      runAnimations();
-    } else {
-      window.addEventListener("page-transition-complete", runAnimations);
-      return () =>
-        window.removeEventListener("page-transition-complete", runAnimations);
-    }
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
   }, []);
+
+  useGSAP(
+    () => {
+      const runAnimations = () => {
+        const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+
+        tl.from(".about-header", {
+          y: 60,
+          opacity: 0,
+          duration: 1.2,
+        })
+          .from(
+            ".about-intro",
+            {
+              y: 40,
+              opacity: 0,
+              duration: 1,
+            },
+            "-=0.8"
+          )
+          .from(
+            ".about-card",
+            {
+              y: 50,
+              opacity: 0,
+              stagger: 0.15,
+              duration: 1,
+            },
+            "-=0.6"
+          );
+      };
+
+      if (window.isPageReady) {
+        runAnimations();
+      } else {
+        window.addEventListener("page-transition-complete", runAnimations);
+        return () =>
+          window.removeEventListener("page-transition-complete", runAnimations);
+      }
+    },
+    { scope: containerRef }
+  );
 
   return (
     <section
-      ref={sectionRef}
+      ref={containerRef}
       id="about"
-      className="py-32 px-6 md:px-12 bg-dark-background relative"
+      className="relative min-h-screen bg-dark-background py-24 md:py-48 px-6 md:px-12 overflow-hidden font-syne"
     >
-      <div className="max-w-[1400px] mx-auto">
-        {/* Massive Header */}
-        <div className="mb-24 flex flex-col md:flex-row justify-between items-end border-b border-white/10 pb-12">
-          <div className="overflow-hidden">
-            <h2 className="about-header-text text-[10vw] md:text-[6vw] font-black font-syne text-white uppercase leading-[0.8] tracking-tighter">
-              About
-              <span className="text-gray-600"> Me.</span>
-            </h2>
+      {/* Background Decorative Element */}
+      <div className="absolute top-0 -left-1/4 w-[40vw] h-[40vw] bg-primary/5 rounded-full blur-[150px] pointer-events-none translate-x-1/4 -translate-y-1/4" />
+
+      <div className="relative z-10 space-y-24">
+        {/* CLEAN HEADER */}
+        <div className="about-header border-b border-white/5 pb-12 flex flex-col md:flex-row justify-between items-end gap-8">
+          <h2 className="text-7xl md:text-8xl font-black uppercase tracking-tighter leading-none">
+            About <br />
+            <span className="bg-white text-black">Me.</span>
+          </h2>
+          <div className="flex items-center gap-4 text-green-600 font-mono text-xs tracking-widest bg-green-500/5 border border-green-500/10 px-6 py-3 rounded-full uppercase">
+            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            Currently Available
           </div>
-          <div className="about-header-text mt-8 md:mt-0 max-w-md text-right">
-            <p className="text-xl text-gray-400 font-light leading-relaxed">
-              I architect digital solutions that merge robust engineering with
-              cutting-edge design.
+        </div>
+
+        {/* TWO-COLUMN INTRO */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+          <div className="about-intro lg:col-span-8">
+            <p className="text-3xl md:text-4xl font-light text-gray-400 leading-tight">
+              I am a{" "}
+              <span className="text-white italic">Creative Developer</span>{" "}
+              dedicated to building stable, high-performance digital products
+              that don&apos;t just function, but inspire.
+            </p>
+          </div>
+          <div className="about-intro lg:col-span-4 flex flex-col gap-8">
+            <div className="p-8 bg-white/2 border border-white/5 rounded-3xl backdrop-blur-3xl space-y-6">
+              <div className="flex justify-between items-center text-[10px] font-mono text-white/30 tracking-[0.3em] uppercase">
+                <span>Location Node</span>
+                <span>{time}</span>
+              </div>
+              <h4 className="text-xl font-bold">Dhaka, Bangladesh</h4>
+              <p className="text-sm text-gray-500 leading-relaxed font-light">
+                Operating at the intersection of technology and design to
+                deliver
+                <span className="text-primary/60">
+                  {" "}
+                  world-class solutions
+                </span>{" "}
+                for a global audience.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* 3-COLUMN PILLAR GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-px md:bg-white/5 md:border md:border-white/5 overflow-hidden rounded-3xl">
+          {/* Card 1: Engineering */}
+          <div className="about-card md:bg-dark-background p-10 flex flex-col justify-between min-h-[380px] hover:bg-white/2 transition-colors group">
+            <div className="space-y-6">
+              <div className="w-14 h-14 rounded-2xl bg-white/3 border border-white/10 flex items-center justify-center text-white group-hover:border-primary/50 transition-colors">
+                <Code2 size={28} strokeWidth={1.5} />
+              </div>
+              <div className="space-y-2">
+                <span className="font-mono text-[10px] text-primary uppercase tracking-widest">
+                  Architect
+                </span>
+                <h3 className="text-2xl font-bold">Engineering</h3>
+              </div>
+            </div>
+            <p className="text-gray-500 text-sm leading-relaxed group-hover:text-gray-300 transition-colors">
+              Building robust, type-safe full-stack applications with Next.js
+              and Cloud infrastructure. Speed and reliability are my baseline.
+            </p>
+          </div>
+
+          {/* Card 2: Motion */}
+          <div className="about-card md:bg-dark-background p-10 flex flex-col justify-between min-h-[380px] hover:bg-white/2 transition-colors group">
+            <div className="space-y-6">
+              <div className="w-14 h-14 rounded-2xl bg-white/3 border border-white/10 flex items-center justify-center text-white group-hover:border-primary/50 transition-colors">
+                <Layers size={28} strokeWidth={1.5} />
+              </div>
+              <div className="space-y-2">
+                <span className="font-mono text-[10px] text-primary uppercase tracking-widest">
+                  Cinematic
+                </span>
+                <h3 className="text-2xl font-bold">Interaction</h3>
+              </div>
+            </div>
+            <p className="text-gray-500 text-sm leading-relaxed group-hover:text-gray-300 transition-colors">
+              Crafting fluid user experiences with GSAP and Framer Motion. I use
+              movement to guide narratives and evoke emotions.
+            </p>
+          </div>
+
+          {/* Card 3: Performance */}
+          <div className="about-card md:bg-dark-background p-10 flex flex-col justify-between min-h-[380px] hover:bg-white/2 transition-colors group">
+            <div className="space-y-6">
+              <div className="w-14 h-14 rounded-2xl bg-white/3 border border-white/10 flex items-center justify-center text-white group-hover:border-primary/50 transition-colors">
+                <Compass size={28} strokeWidth={1.5} />
+              </div>
+              <div className="space-y-2">
+                <span className="font-mono text-[10px] text-primary uppercase tracking-widest">
+                  Optimized
+                </span>
+                <h3 className="text-2xl font-bold">Performance</h3>
+              </div>
+            </div>
+            <p className="text-gray-500 text-sm leading-relaxed group-hover:text-gray-300 transition-colors">
+              Optimization is a philosophy. I target 100/100 Lighthouse scores
+              by focusing on critical paths and asset efficiency.
             </p>
           </div>
         </div>
 
-        {/* The Symmetrical Grid */}
-        <div className="swiss-grid grid grid-cols-1 md:grid-cols-2 gap-px bg-white/10 border border-white/10 overflow-hidden">
-          {/* 1. Engineering */}
-          <div className="swiss-card bg-dark-background p-12 md:p-16 flex flex-col justify-between group hover:bg-white/[0.02] transition-colors min-h-[400px]">
-            <div className="flex justify-between items-start">
-              <div className="w-16 h-16 rounded-full border border-white/10 flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-500">
-                <Code2 size={32} strokeWidth={1.5} />
-              </div>
-              <span className="font-mono text-sm text-gray-500">01</span>
+        {/* BOTTOM ACTION */}
+        <div className="about-card flex flex-col md:flex-row justify-between items-center gap-12 pt-12">
+          <div className="flex gap-16 font-mono text-[10px] text-white/20 tracking-widest">
+            <div className="space-y-1">
+              <span className="block text-white/40">TECH_STACK</span>
+              <span>NEXT.JS // TS // GSAP</span>
             </div>
-            <div>
-              <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                Engineering
-              </h3>
-              <p className="text-gray-400 leading-relaxed hover:text-white transition-colors">
-                Scalable, type-safe architecture using Next.js and TypeScript.
-              </p>
+            <div className="space-y-1">
+              <span className="block text-white/40">VERSION</span>
+              <span>FINAL_V1.0</span>
             </div>
           </div>
 
-          {/* 2. Interaction */}
-          <div className="swiss-card bg-dark-background p-12 md:p-16 flex flex-col justify-between group hover:bg-white/[0.02] transition-colors min-h-[400px]">
-            <div className="flex justify-between items-start">
-              <div className="w-16 h-16 rounded-full border border-white/10 flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-500">
-                <Zap size={32} strokeWidth={1.5} />
-              </div>
-              <span className="font-mono text-sm text-gray-500">02</span>
+          <button className="group relative px-12 py-5 bg-white text-black font-bold uppercase tracking-widest text-xs rounded-full overflow-hidden hover:pr-16 transition-all duration-500">
+            <span className="relative z-10 transition-transform group-hover:-translate-x-2 inline-block">
+              Work with me
+            </span>
+            <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500">
+              &rarr;
             </div>
-            <div>
-              <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                Interaction
-              </h3>
-              <p className="text-gray-400 leading-relaxed hover:text-white transition-colors">
-                Immersive animations with GSAP and WebGL for deep engagement.
-              </p>
-            </div>
-          </div>
-
-          {/* 3. Performance */}
-          <div className="swiss-card bg-dark-background p-12 md:p-16 flex flex-col justify-between group hover:bg-white/[0.02] transition-colors min-h-[400px]">
-            <div className="flex justify-between items-start">
-              <div className="w-16 h-16 rounded-full border border-white/10 flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-500">
-                <Rocket size={32} strokeWidth={1.5} />
-              </div>
-              <span className="font-mono text-sm text-gray-500">03</span>
-            </div>
-            <div>
-              <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                Performance
-              </h3>
-              <p className="text-gray-400 leading-relaxed hover:text-white transition-colors">
-                99+ Lighthouse scores. Speed as a fundamental feature.
-              </p>
-            </div>
-          </div>
-
-          {/* 4. Contact / Status  */}
-          <div className="swiss-card bg-dark-background p-12 md:p-16 flex flex-col justify-between group hover:bg-white/[0.02] transition-colors min-h-[400px]">
-            <div className="flex justify-between items-start">
-              <div className="relative">
-                <div className="w-16 h-16 rounded-full border border-green-500/30 flex items-center justify-center">
-                  <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                  </span>
-                </div>
-              </div>
-              <span className="font-mono text-sm text-gray-500">04</span>
-            </div>
-            <div>
-              <span className="text-xs font-mono text-green-500 uppercase tracking-widest block mb-2">
-                Based in Dhaka
-              </span>
-              <h3 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                Available for Work
-              </h3>
-              <div className="flex items-center gap-2 text-white group-hover:gap-4 transition-all">
-                <span className="border-b border-white">Contact Me</span>
-                <ArrowRight size={18} />
-              </div>
-            </div>
-          </div>
+          </button>
         </div>
       </div>
     </section>
