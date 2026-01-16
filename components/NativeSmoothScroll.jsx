@@ -17,7 +17,7 @@ export default function NativeSmoothScroll({ children }) {
   useEffect(() => {
     let currentScroll = 0;
     let targetScroll = 0;
-    let ease = 0.075;
+    let ease = 1;
     let animationFrameId = null;
     let isRunning = false;
 
