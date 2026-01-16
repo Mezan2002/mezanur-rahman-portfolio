@@ -238,7 +238,6 @@ export default function ContentEditorPage({ params }) {
 
   const handleSave = () => {
     setIsSaving(true);
-    console.log("Saving content:", { pageId, formData });
 
     setTimeout(() => {
       setIsSaving(false);

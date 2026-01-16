@@ -17,7 +17,7 @@ export default function NativeSmoothScroll({ children }) {
   useEffect(() => {
     let currentScroll = 0;
     let targetScroll = 0;
-    let ease = 1;
+    let ease = 0.075;
     let animationFrameId = null;
     let isRunning = false;
 
@@ -36,6 +36,9 @@ export default function NativeSmoothScroll({ children }) {
         contentRef.current.style.transform = `translate3d(0, -${currentScroll}px, 0)`;
       }
 
+      // Update ScrollTrigger to use the smoothed value
+      ScrollTrigger.update();
+
       // Always continue the animation loop
       animationFrameId = requestAnimationFrame(smoothScroll);
     };
@@ -44,13 +47,38 @@ export default function NativeSmoothScroll({ children }) {
       // Set initial height
       updateBodyHeight();
 
+      // GSAP ScrollTrigger Proxy
+      ScrollTrigger.scrollerProxy(document.body, {
+        scrollTop(value) {
+          if (arguments.length) {
+            window.scrollTo(0, value);
+            return;
+          }
+          return currentScroll; // Return the smoothed value
+        },
+        getBoundingClientRect() {
+          return {
+            top: 0,
+            left: 0,
+            width: window.innerWidth,
+            height: window.innerHeight,
+          };
+        },
+        // We use document.body since that's what has the height and scrollbar
+        pinType: "transform",
+      });
+
       // Start smooth scroll
       if (!isRunning) {
         isRunning = true;
         animationFrameId = requestAnimationFrame(smoothScroll);
       }
 
+      // Set as default scroller
+      ScrollTrigger.defaults({ scroller: document.body });
+
       setIsReady(true);
+      ScrollTrigger.refresh();
     };
 
     // Initialize after a small delay to ensure DOM is ready
@@ -59,17 +87,13 @@ export default function NativeSmoothScroll({ children }) {
     // Update height on resize
     const handleResize = () => {
       updateBodyHeight();
-      if (ScrollTrigger) {
-        ScrollTrigger.refresh();
-      }
+      ScrollTrigger.refresh();
     };
 
     // Update height when images load
     const handleLoad = () => {
       updateBodyHeight();
-      if (ScrollTrigger) {
-        ScrollTrigger.refresh();
-      }
+      ScrollTrigger.refresh();
     };
 
     window.addEventListener("resize", handleResize);
@@ -78,6 +102,7 @@ export default function NativeSmoothScroll({ children }) {
     // Observe content changes
     const observer = new MutationObserver(() => {
       updateBodyHeight();
+      ScrollTrigger.refresh();
     });
 
     if (contentRef.current) {
@@ -95,6 +120,10 @@ export default function NativeSmoothScroll({ children }) {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("load", handleLoad);
       observer.disconnect();
+
+      // Reset defaults
+      ScrollTrigger.defaults({ scroller: window });
+
       document.body.style.height = "";
       isRunning = false;
     };

@@ -67,7 +67,6 @@ export default function AdminSidebar() {
           const userData = response.data?.user || response.data;
           setUser(userData);
           localStorage.setItem("user", JSON.stringify(userData));
-          console.log("👤 Sidebar: user data:", userData);
         }
       } catch (err) {
         console.error("Sidebar: Profile sync failed", err);

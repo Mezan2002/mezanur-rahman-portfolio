@@ -20,7 +20,6 @@ export default function Pricing() {
       try {
         setLoading(true);
         const res = await getPricing();
-        console.log("🚀 ~ fetchPricing ~ res:", res);
         if (res.success) {
           // Map API data to component format
           const mappedTiers = res.data.map((plan) => ({
@@ -140,7 +139,6 @@ export default function Pricing() {
                   : "bg-white/1 border border-white/5 hover:border-white/10"
               }`}
             >
-              {console.log(tier)}
               {tier.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-6 py-1 bg-primary text-black font-black font-syne text-[10px] w-max rounded-full uppercase tracking-widest flex items-center gap-2">
                   <Flame size={12} className="fill-black" />
@@ -157,7 +155,6 @@ export default function Pricing() {
                     <span className="text-5xl font-black font-syne text-white">
                       {tier.price}
                     </span>
-                    {console.log(tier.price)}
                     {tier.price !== "Custom" && (
                       <span className="text-gray-500 font-mono text-xs uppercase tracking-widest">
                         / project
