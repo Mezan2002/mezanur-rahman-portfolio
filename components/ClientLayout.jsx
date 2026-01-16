@@ -5,7 +5,6 @@ import Preloader from "@/components/Preloader";
 import Footer from "@/components/shared/Footer";
 import Navbar from "@/components/shared/Navbar";
 import { usePathname } from "next/navigation";
-import NativeSmoothScroll from "./NativeSmoothScroll";
 
 export default function ClientLayout({ children }) {
   const pathname = usePathname();
@@ -22,11 +21,9 @@ export default function ClientLayout({ children }) {
       <Preloader />
       <NoiseOverlay />
       <main>
-        <NativeSmoothScroll>
-          <Navbar />
-          {children}
-          <Footer />
-        </NativeSmoothScroll>
+        <Navbar />
+        {children}
+        <Footer />
       </main>
     </>
   );
