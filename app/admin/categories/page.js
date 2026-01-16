@@ -1,35 +1,45 @@
 "use client";
 
+import { createCategory, deleteCategory, getCategories } from "@/lib/api";
 import gsap from "gsap";
-import { ChevronRight, Folder, Plus, Tag, Trash2 } from "lucide-react";
+import {
+  ChevronRight,
+  Folder,
+  Loader2,
+  Plus,
+  Tag,
+  Trash2,
+  X,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-
-const mockCategories = [
-  { id: 1, name: "Design", count: 12, slug: "design", color: "#B4FF00" },
-  {
-    id: 2,
-    name: "Development",
-    count: 8,
-    slug: "development",
-    color: "#00D9FF",
-  },
-  { id: 3, name: "Philosophy", count: 3, slug: "philosophy", color: "#FF006E" },
-  {
-    id: 4,
-    name: "AI",
-    count: 5,
-    slug: "artificial-intelligence",
-    color: "#9D4EDD",
-  },
-  { id: 5, name: "Business", count: 1, slug: "business", color: "#FFB800" },
-];
 
 export default function CategoriesPage() {
   const containerRef = useRef(null);
-  const [categories, setCategories] = useState(mockCategories);
+
+  // Data States
+  const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState("");
 
+  // UI States
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
+      const res = await getCategories();
+      setCategories(res.data || []);
+    } catch (err) {
+      setError(err.message || "Failed to load categories");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
+    fetchCategories();
+
     const ctx = gsap.context(() => {
       gsap.set(".animate-in", { opacity: 0, y: 20 });
       gsap.to(".animate-in", {
@@ -44,25 +54,44 @@ export default function CategoriesPage() {
     return () => ctx.revert();
   }, []);
 
-  const handleAddCategory = (e) => {
+  const handleAddCategory = async (e) => {
     e.preventDefault();
     if (!newCategory) return;
-    const newCat = {
-      id: Date.now(),
-      name: newCategory,
-      count: 0,
-      slug: newCategory.toLowerCase().replace(/ /g, "-"),
-      color: "#B4FF00",
-    };
-    setCategories([newCat, ...categories]);
-    setNewCategory("");
-  };
 
-  const handleDelete = (id) => {
-    if (confirm("Are you sure you want to delete this category?")) {
-      setCategories(categories.filter((c) => c.id !== id));
+    setActionLoading(true);
+    setError(null);
+
+    try {
+      const slug = newCategory.toLowerCase().replace(/ /g, "-");
+      await createCategory({ name: newCategory, slug });
+      setNewCategory("");
+      await fetchCategories(); // Refresh list
+    } catch (err) {
+      setError(err.message || "Failed to create category");
+    } finally {
+      setActionLoading(false);
     }
   };
+
+  const handleDelete = async (id) => {
+    if (
+      !confirm(
+        "Are you sure you want to delete this category? This might affect blogs using it."
+      )
+    )
+      return;
+
+    try {
+      setError(null);
+      await deleteCategory(id);
+      setCategories(categories.filter((c) => c._id !== id));
+    } catch (err) {
+      setError(err.message || "Failed to delete category");
+    }
+  };
+
+  // Helper colors for categories based on index if not provided by backend
+  const colors = ["#B4FF00", "#00D9FF", "#FF006E", "#9D4EDD", "#FFB800"];
 
   return (
     <div ref={containerRef} className="space-y-12 min-h-screen pb-20">
@@ -79,6 +108,15 @@ export default function CategoriesPage() {
           Organize your content into meaningful topics
         </p>
       </div>
+
+      {error && (
+        <div className="animate-in p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm font-mono flex items-center justify-between">
+          <span>{error}</span>
+          <button onClick={() => setError(null)}>
+            <X size={16} />
+          </button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         {/* Create Form - Sticky Sidebar */}
@@ -100,7 +138,7 @@ export default function CategoriesPage() {
 
             <form onSubmit={handleAddCategory} className="space-y-6">
               <div>
-                <label className="text-xs font-mono uppercase tracking-widest text-gray-400 mb-3 block flex items-center gap-2">
+                <label className="flex text-xs font-mono uppercase tracking-widest text-gray-400 mb-3 items-center gap-2">
                   <Tag size={12} />
                   Category Name
                 </label>
@@ -118,12 +156,16 @@ export default function CategoriesPage() {
 
               <button
                 type="submit"
-                disabled={!newCategory}
+                disabled={!newCategory || actionLoading}
                 className="w-full py-4 bg-primary text-black font-black font-syne uppercase tracking-widest rounded-2xl hover:bg-white hover:scale-[1.02] transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-[0_0_20px_rgba(180,255,0,0.2)] hover:shadow-[0_0_30px_rgba(180,255,0,0.4)]"
               >
                 <span className="flex items-center justify-center gap-2">
-                  <Plus size={18} />
-                  Add Category
+                  {actionLoading ? (
+                    <Loader2 size={18} className="animate-spin" />
+                  ) : (
+                    <Plus size={18} />
+                  )}
+                  {actionLoading ? "Adding..." : "Add Category"}
                 </span>
               </button>
             </form>
@@ -132,7 +174,16 @@ export default function CategoriesPage() {
 
         {/* Categories Grid */}
         <div className="lg:col-span-3 space-y-5">
-          {categories.length === 0 ? (
+          {loading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-24 bg-white/5 animate-pulse rounded-3xl border border-white/5 shadow-inner"
+                ></div>
+              ))}
+            </div>
+          ) : categories.length === 0 ? (
             <div className="animate-in text-center py-20 bg-white/2 border border-dashed border-white/10 rounded-3xl">
               <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
                 <Folder size={32} className="text-gray-600" />
@@ -147,20 +198,20 @@ export default function CategoriesPage() {
           ) : (
             categories.map((cat, index) => (
               <div
-                key={cat.id}
-                className="animate-in group relative bg-gradient-to-br from-[#0a0a0a] to-black border border-white/5 rounded-3xl p-6 hover:border-white/20 transition-all duration-300 overflow-hidden"
+                key={cat._id}
+                className="animate-in group relative bg-linear-to-br from-[#0a0a0a] to-black border border-white/5 rounded-3xl p-6 hover:border-white/20 transition-all duration-300 overflow-hidden"
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 {/* Accent Line */}
                 <div
                   className="absolute left-0 top-0 bottom-0 w-1 opacity-50 group-hover:opacity-100 transition-opacity"
-                  style={{ backgroundColor: cat.color }}
+                  style={{ backgroundColor: colors[index % colors.length] }}
                 ></div>
 
                 {/* Background Glow */}
                 <div
                   className="absolute -right-10 -top-10 w-40 h-40 rounded-full opacity-0 group-hover:opacity-10 blur-3xl transition-opacity duration-700"
-                  style={{ backgroundColor: cat.color }}
+                  style={{ backgroundColor: colors[index % colors.length] }}
                 ></div>
 
                 <div className="relative flex items-center justify-between">
@@ -168,11 +219,14 @@ export default function CategoriesPage() {
                     <div
                       className="w-14 h-14 rounded-2xl flex items-center justify-center border transition-all group-hover:scale-110 duration-300"
                       style={{
-                        backgroundColor: `${cat.color}10`,
-                        borderColor: `${cat.color}30`,
+                        backgroundColor: `${colors[index % colors.length]}10`,
+                        borderColor: `${colors[index % colors.length]}30`,
                       }}
                     >
-                      <Folder size={24} style={{ color: cat.color }} />
+                      <Folder
+                        size={24}
+                        style={{ color: colors[index % colors.length] }}
+                      />
                     </div>
                     <div>
                       <h3 className="text-xl font-bold font-syne text-white mb-1 group-hover:text-primary transition-colors">
@@ -183,20 +237,25 @@ export default function CategoriesPage() {
                           <span className="text-gray-600">/</span>
                           {cat.slug}
                         </span>
-                        <span className="w-1 h-1 bg-gray-700 rounded-full"></span>
-                        <span
-                          className="font-bold"
-                          style={{ color: cat.color }}
-                        >
-                          {cat.count} Posts
-                        </span>
+                        {/* Status/Count if available */}
+                        {cat.count !== undefined && (
+                          <>
+                            <span className="w-1 h-1 bg-gray-700 rounded-full"></span>
+                            <span
+                              className="font-bold"
+                              style={{ color: colors[index % colors.length] }}
+                            >
+                              {cat.count} Posts
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-2 md:opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
-                      onClick={() => handleDelete(cat.id)}
+                      onClick={() => handleDelete(cat._id)}
                       className="p-3 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all"
                       title="Delete category"
                     >

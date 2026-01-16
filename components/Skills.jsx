@@ -1,23 +1,46 @@
 "use client";
 
+import { getSkills } from "@/lib/api";
 import { Star } from "lucide-react";
-
-const skills = [
-  "JavaScript",
-  "TypeScript",
-  "React",
-  "Next.js",
-  "Node.js",
-  "GSAP",
-  "TailwindCSS",
-  "MongoDB",
-  "PostgreSQL",
-  "Docker",
-  "AWS",
-  "Figma",
-];
+import { useEffect, useState } from "react";
 
 export default function Skills() {
+  const [skills, setSkills] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSkills = async () => {
+      try {
+        setLoading(true);
+        const res = await getSkills();
+        if (res.success) {
+          // Extract skill names from API response
+          const skillNames = res.data.map((skill) => skill.name);
+          setSkills(skillNames);
+        }
+      } catch (error) {
+        console.error("Failed to fetch skills:", error);
+        // Fallback to default skills if API fails
+        setSkills([
+          "JavaScript",
+          "TypeScript",
+          "React",
+          "Next.js",
+          "Node.js",
+          "GSAP",
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSkills();
+  }, []);
+
+  if (loading || skills.length === 0) {
+    return null; // Or a skeleton loader
+  }
+
   return (
     <section className="py-10 bg-dark-background border-y border-white/5 overflow-hidden relative">
       <div className="relative flex overflow-x-hidden">

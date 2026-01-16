@@ -1,91 +1,61 @@
 "use client";
 
+import { getTestimonials } from "@/lib/api";
 import gsap from "gsap";
-import { ArrowLeft, Quote, Star } from "lucide-react";
+import parse from "html-react-parser";
+import { ArrowLeft, Loader2, Quote, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
-
-const allTestimonials = [
-  {
-    id: 1,
-    name: "Sarah Chen",
-    role: "CEO, TechFlow",
-    content:
-      "Working with Mezanur was transformative for our product. His attention to detail and ability to translate complex requirements into elegant solutions is unmatched.",
-    image:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200",
-    rating: 5,
-  },
-  {
-    id: 2,
-    name: "James Wilson",
-    role: "CTO, FinanceHub",
-    content:
-      "Exceptional developer who understands both the technical and business side. The dashboard he built increased our user engagement by 40%.",
-    image:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200",
-    rating: 5,
-  },
-  {
-    id: 3,
-    name: "Emily Rodriguez",
-    role: "Product Manager, Cloudify",
-    content:
-      "Mezanur doesn't just code—he thinks like a product designer. His GSAP animations brought our brand to life in ways we never imagined.",
-    image:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200",
-    rating: 5,
-  },
-  {
-    id: 4,
-    name: "Michael Ross",
-    role: "Founding Engineer, ScaleUp",
-    content:
-      "The level of craftsmanship in his code is rare. He delivered a high-performance application that exceeded all our speed benchmarks.",
-    image:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200",
-    rating: 5,
-  },
-  {
-    id: 5,
-    name: "Jessica Lee",
-    role: "Director of UX, DesignFirst",
-    content:
-      "A truly creative mind who pushes the boundaries of web experiences. His work on our portfolio transition was flawless.",
-    image:
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200",
-    rating: 5,
-  },
-  {
-    id: 6,
-    name: "David Chen",
-    role: "Founder, Zenith AI",
-    content:
-      "Rare combination of aesthetic sense and technical depth. Mezanur is our go-to for high-end frontend development.",
-    image:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200",
-    rating: 5,
-  },
-];
+import { useEffect, useRef, useState } from "react";
 
 export default function PublicTestimonialsPage() {
   const containerRef = useRef(null);
+  const [testimonials, setTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.set(".animate-in", { opacity: 0, y: 50 });
-      gsap.to(".animate-in", {
-        y: 0,
-        opacity: 1,
-        duration: 1,
-        stagger: 0.1,
-        ease: "power4.out",
-        clearProps: "all",
-      });
-    }, containerRef);
-    return () => ctx.revert();
+    const fetchTestimonials = async () => {
+      try {
+        setLoading(true);
+        const res = await getTestimonials();
+        setTestimonials(res.data || []);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTestimonials();
   }, []);
+
+  useEffect(() => {
+    if (!loading && testimonials.length > 0) {
+      const ctx = gsap.context(() => {
+        gsap.set(".animate-in", { opacity: 0, y: 50 });
+        gsap.to(".animate-in", {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          stagger: 0.1,
+          ease: "power4.out",
+          clearProps: "all",
+        });
+      }, containerRef);
+      return () => ctx.revert();
+    }
+  }, [loading, testimonials]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-dark-background flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        <p className="text-gray-500 font-mono text-xs uppercase tracking-widest">
+          Gathering Feedback...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <main
@@ -123,51 +93,62 @@ export default function PublicTestimonialsPage() {
           </h1>
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {allTestimonials.map((testimonial, index) => (
-            <div
-              key={testimonial.id}
-              className="animate-in group p-10 bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all duration-500 flex flex-col justify-between"
-            >
-              <div className="relative">
-                <Quote className="w-10 h-10 text-primary/20 mb-8" />
-                <div className="flex gap-1 mb-6">
-                  {Array.from({ length: testimonial.rating }).map((_, i) => (
-                    <Star
-                      key={i}
-                      size={14}
-                      className="fill-primary text-primary"
-                    />
-                  ))}
+        {error ? (
+          <div className="animate-in p-8 border border-red-500/20 bg-red-500/5 rounded-3xl text-red-400 font-mono">
+            Error loading testimonials: {error}
+          </div>
+        ) : (
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
+            {testimonials.map((testimonial, index) => (
+              <div
+                key={testimonial._id || testimonial.id}
+                className="animate-in break-inside-avoid group p-10 bg-white/2 border border-white/5 hover:border-white/10 transition-all duration-500 flex flex-col justify-between"
+              >
+                <div className="relative">
+                  <Quote className="w-10 h-10 text-primary/20 mb-8" />
+                  <div className="flex gap-1 mb-6">
+                    {Array.from({ length: testimonial.rating || 5 }).map(
+                      (_, i) => (
+                        <Star
+                          key={i}
+                          size={14}
+                          className="fill-primary text-primary"
+                        />
+                      )
+                    )}
+                  </div>
+                  <div className="text-xl text-gray-400 leading-relaxed font-medium mb-10 group-hover:text-white transition-colors">
+                    {parse(testimonial.content || "")}
+                  </div>
                 </div>
-                <p className="text-xl text-gray-400 leading-relaxed font-medium mb-10 group-hover:text-white transition-colors">
-                  &ldquo;{testimonial.content}&rdquo;
-                </p>
-              </div>
 
-              <div className="flex items-center gap-5 pt-8 border-t border-white/5">
-                <div className="w-14 h-14 rounded-full overflow-hidden border border-white/10 grayscale group-hover:grayscale-0 transition-all duration-500">
-                  <Image
-                    src={testimonial.image}
-                    alt={testimonial.name}
-                    width={56}
-                    height={56}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div>
-                  <h4 className="text-white font-bold font-syne uppercase tracking-wider">
-                    {testimonial.name}
-                  </h4>
-                  <p className="text-[10px] text-gray-500 font-mono uppercase tracking-[0.2em]">
-                    {testimonial.role}
-                  </p>
+                <div className="flex items-center gap-5 pt-8 border-t border-white/5">
+                  <div className="w-14 h-14 rounded-full overflow-hidden border border-white/10 grayscale group-hover:grayscale-0 transition-all duration-500 shrink-0">
+                    <Image
+                      src={
+                        testimonial.image ||
+                        testimonial.avatar ||
+                        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200"
+                      }
+                      alt={testimonial.name}
+                      width={56}
+                      height={56}
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-bold font-syne uppercase tracking-wider mb-1">
+                      {testimonial.name}
+                    </h4>
+                    <p className="text-[10px] text-gray-500 font-mono uppercase tracking-[0.2em]">
+                      {testimonial.role || testimonial.position}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );

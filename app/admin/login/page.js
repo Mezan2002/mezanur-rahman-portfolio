@@ -1,5 +1,6 @@
 "use client";
 
+import { login } from "@/lib/api";
 import gsap from "gsap";
 import { ArrowRight, Lock, Mail, Scan, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -57,7 +58,7 @@ export default function AdminLoginPage() {
     return () => ctx.revert();
   }, []);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -71,9 +72,18 @@ export default function AdminLoginPage() {
       });
     }
 
-    setTimeout(() => {
-      if (email === "admin@example.com" && password === "admin") {
+    try {
+      const response = await login(email, password);
+
+      if (response.success) {
+        const userData = response.data?.user || response.data;
+        localStorage.setItem(
+          "accessToken",
+          response.data?.accessToken || response.accessToken
+        );
+        localStorage.setItem("user", JSON.stringify(userData));
         localStorage.setItem("isAdmin", "true");
+
         gsap.to(".login-container", {
           scale: 1.1,
           opacity: 0,
@@ -82,14 +92,14 @@ export default function AdminLoginPage() {
           ease: "back.in(1.7)",
           onComplete: () => router.push("/admin"),
         });
-      } else {
-        alert("Access Denied");
-        setIsLoading(false);
-        if (scanLine) {
-          gsap.to(scanLine, { height: "0%", opacity: 0, duration: 0.5 });
-        }
       }
-    }, 1500);
+    } catch (error) {
+      alert(error.message || "Access Denied");
+      setIsLoading(false);
+      if (scanLine) {
+        gsap.to(scanLine, { height: "0%", opacity: 0, duration: 0.5 });
+      }
+    }
   };
 
   return (

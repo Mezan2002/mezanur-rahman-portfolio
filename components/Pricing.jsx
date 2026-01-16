@@ -1,100 +1,111 @@
 "use client";
 
+import { getPricing } from "@/lib/api";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Check, Flame } from "lucide-react";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const tiers = [
-  {
-    id: "essential",
-    name: "Essential",
-    price: "$1,499",
-    description: "Perfect for high-impact landing pages and brand sites.",
-    features: [
-      "Custom UI/UX Design",
-      "Next.js Development",
-      "Basic GSAP Animations",
-      "Mobile Responsive",
-      "SEO Optimization",
-      "5 Page Implementation",
-    ],
-    cta: "Start Project",
-    popular: false,
-  },
-  {
-    id: "professional",
-    name: "Professional",
-    price: "$4,999",
-    description: "Ideal for complex SaaS platforms and digital products.",
-    features: [
-      "Everything in Essential",
-      "Custom Dashboard UI",
-      "Full Component Library",
-      "Advanced GSAP Motion",
-      "CMS Integration",
-      "Performance Tuning",
-      "Deployment Setup",
-    ],
-    cta: "Recommended",
-    popular: true,
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    price: "Custom",
-    description:
-      "Strategic partnerships for large-scale digital transformations.",
-    features: [
-      "Everything in Professional",
-      "WebGL Interactions",
-      "3D Scene Integration",
-      "System Architecture",
-      "Priority Support",
-      "Long-term Maintenance",
-      "Consulting Strategy",
-    ],
-    cta: "Partner With Me",
-    popular: false,
-  },
-];
-
 export default function Pricing() {
   const sectionRef = useRef(null);
+  const [tiers, setTiers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch pricing from API
+  useEffect(() => {
+    const fetchPricing = async () => {
+      try {
+        setLoading(true);
+        const res = await getPricing();
+        console.log("🚀 ~ fetchPricing ~ res:", res);
+        if (res.success) {
+          // Map API data to component format
+          const mappedTiers = res.data.map((plan) => ({
+            id: plan._id,
+            name: plan.name,
+            // Don't add $ if price is "Custom", otherwise add $ prefix
+            price:
+              plan.price === "Custom"
+                ? plan.price
+                : plan.price
+                ? `$${plan.price}`
+                : "Custom",
+            description: plan.description,
+            features: plan.features || [],
+            cta: plan.recommended ? "Recommended" : "Start Project",
+            popular: plan.isPopular || false,
+          }));
+          setTiers(mappedTiers);
+        }
+      } catch (error) {
+        console.error("Failed to fetch pricing:", error);
+        // Fallback to default pricing
+        setTiers([
+          {
+            id: "essential",
+            name: "Essential",
+            price: "$1,499",
+            description:
+              "Perfect for high-impact landing pages and brand sites.",
+            features: [
+              "Custom UI/UX Design",
+              "Next.js Development",
+              "Mobile Responsive",
+            ],
+            cta: "Start Project",
+            popular: false,
+          },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPricing();
+  }, []);
 
   useGSAP(
     () => {
-      const runAnimations = () => {
-        // Set initial states immediately to prevent flicker
-        gsap.set(".pricing-card", { y: 60, opacity: 0 });
+      if (!loading && tiers.length > 0) {
+        const runAnimations = () => {
+          // Set initial states immediately to prevent flicker
+          gsap.set(".pricing-card", { y: 60, opacity: 0 });
 
-        // Reveal pricing cards
-        gsap.to(".pricing-card", {
-          y: 0,
-          opacity: 1,
-          stagger: 0.2,
-          duration: 0.3,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 70%",
-          },
-        });
-      };
+          // Reveal pricing cards
+          gsap.to(".pricing-card", {
+            y: 0,
+            opacity: 1,
+            stagger: 0.2,
+            duration: 0.3,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top 70%",
+            },
+          });
+        };
 
-      if (window.isPageReady) {
-        runAnimations();
-      } else {
-        window.addEventListener("page-transition-complete", runAnimations);
-        return () =>
-          window.removeEventListener("page-transition-complete", runAnimations);
+        if (window.isPageReady) {
+          runAnimations();
+        } else {
+          window.addEventListener("page-transition-complete", runAnimations);
+          return () =>
+            window.removeEventListener(
+              "page-transition-complete",
+              runAnimations
+            );
+        }
       }
     },
-    { scope: sectionRef }
+    { scope: sectionRef, dependencies: [loading, tiers] }
   );
+
+  if (loading) {
+    return null; // Or skeleton loader
+  }
 
   return (
     <section
@@ -129,6 +140,7 @@ export default function Pricing() {
                   : "bg-white/1 border border-white/5 hover:border-white/10"
               }`}
             >
+              {console.log(tier)}
               {tier.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-6 py-1 bg-primary text-black font-black font-syne text-[10px] w-max rounded-full uppercase tracking-widest flex items-center gap-2">
                   <Flame size={12} className="fill-black" />
@@ -145,9 +157,10 @@ export default function Pricing() {
                     <span className="text-5xl font-black font-syne text-white">
                       {tier.price}
                     </span>
+                    {console.log(tier.price)}
                     {tier.price !== "Custom" && (
                       <span className="text-gray-500 font-mono text-xs uppercase tracking-widest">
-                        / Project
+                        / project
                       </span>
                     )}
                   </div>
@@ -157,9 +170,9 @@ export default function Pricing() {
                 </div>
 
                 <div className="space-y-4 pt-8 border-t border-white/5">
-                  {tier.features.map((feature) => (
+                  {tier.features.map((feature, idx) => (
                     <div
-                      key={feature}
+                      key={idx}
                       className="flex items-center gap-4 text-sm text-gray-400 group-hover:text-gray-300 transition-colors"
                     >
                       <div className="shrink-0 w-5 h-5 rounded-full border border-white/10 flex items-center justify-center text-primary">

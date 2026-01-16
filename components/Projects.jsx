@@ -1,59 +1,41 @@
 "use client";
 
+import { getProjects } from "@/lib/api";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const projects = [
-  {
-    id: 1,
-    title: "E-Commerce",
-    number: "01",
-    type: "Digital Commercial",
-    year: "2024",
-    image:
-      "https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?auto=format&fit=crop&q=80&w=1600",
-  },
-  {
-    id: 2,
-    title: "Fintech App",
-    number: "02",
-    type: "Financial Ecosystem",
-    year: "2023",
-    image:
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1600",
-  },
-  {
-    id: 3,
-    title: "AI Platform",
-    number: "03",
-    type: "Intelligent Systems",
-    year: "2024",
-    image:
-      "https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?auto=format&fit=crop&q=80&w=1600",
-  },
-  {
-    id: 4,
-    title: "Luxury Estate",
-    number: "04",
-    type: "Immersive Real Estate",
-    year: "2023",
-    image:
-      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=1600",
-  },
-];
-
 export default function Projects() {
   const containerRef = useRef(null);
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await getProjects();
+        if (response.data && response.data.length > 0) {
+          setProjects(response.data);
+        }
+      } catch (err) {
+        console.error("Projects: Fetch failed", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProjects();
+  }, []);
 
   useGSAP(
     () => {
+      if (loading) return;
+
       const runAnimations = () => {
         const items = gsap.utils.toArray(".project-grid-item");
 
@@ -110,7 +92,7 @@ export default function Projects() {
           window.removeEventListener("page-transition-complete", runAnimations);
       }
     },
-    { scope: containerRef }
+    { dependencies: [loading], scope: containerRef }
   );
 
   return (
@@ -126,7 +108,7 @@ export default function Projects() {
             <div className="flex items-center gap-4">
               <div className="w-12 h-px bg-primary/40"></div>
               <p className="text-gray-500 uppercase tracking-[0.4em] text-[10px] font-mono">
-                Select Works // 2023 - 2024
+                Select Works // 2023 - 2026
               </p>
             </div>
             <h2 className="text-7xl md:text-9xl font-black font-syne text-white uppercase leading-[0.8] tracking-tighter">
@@ -144,71 +126,90 @@ export default function Projects() {
         </div>
 
         {/* Asymmetric Minimalist Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
-          {projects.map((project, index) => (
-            <div
-              key={project.id}
-              className={`project-grid-item group relative ${
-                index % 2 !== 0 ? "md:mt-20" : ""
-              }`}
-            >
-              <Link
-                href={`/project/${project.id}`}
-                className="relative block w-full overflow-hidden"
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 min-h-[400px]">
+          {loading ? (
+            // Skeleton Loader
+            [1, 2].map((i) => (
+              <div
+                key={i}
+                className={`h-[400px] bg-white/5 rounded-sm animate-pulse ${
+                  i % 2 !== 0 ? "" : "md:mt-20"
+                }`}
+              ></div>
+            ))
+          ) : projects.length === 0 ? (
+            <div className="col-span-full py-20 text-center text-gray-500 font-mono uppercase tracking-widest border border-dashed border-white/10 rounded-2xl">
+              No archives found in the database.
+            </div>
+          ) : (
+            projects.map((project, index) => (
+              <div
+                key={project._id || project.id}
+                className={`project-grid-item group relative ${
+                  index % 2 !== 0 ? "md:mt-20" : ""
+                }`}
               >
-                {/* Image Window */}
-                <div className="relative aspect-4/3 overflow-hidden bg-white/5 rounded-sm grayscale group-hover:grayscale-0 transition-all duration-[1.5s] ease-expo">
-                  <div className="parallax-img absolute inset-0 w-full h-[120%] top-[-10%]">
-                    <Image
-                      src={project.image}
-                      alt={project.title}
-                      fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-[2s] ease-expo opacity-80 group-hover:opacity-100"
-                    />
-                  </div>
-
-                  {/* Discrete Corner Detail */}
-                  <div className="absolute top-8 left-8 z-10">
-                    <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest bg-black/40 backdrop-blur-md px-3 py-1 border border-white/5 rounded-full">
-                      {project.number}
-                    </span>
-                  </div>
-
-                  {/* Hover Action Overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-700 backdrop-blur-[2px]">
-                    <div className="w-20 h-20 rounded-full border border-white/20 flex items-center justify-center text-white scale-50 group-hover:scale-100 transition-all duration-700 ease-expo">
-                      <ArrowUpRight size={32} />
+                <Link
+                  href={`/project/${project._id || project.id}`}
+                  className="relative block w-full overflow-hidden"
+                >
+                  {/* Image Window */}
+                  <div className="relative aspect-4/3 overflow-hidden bg-white/5 rounded-sm grayscale group-hover:grayscale-0 transition-all duration-[1.5s] ease-expo">
+                    <div className="parallax-img absolute inset-0 w-full h-[120%] top-[-10%]">
+                      <Image
+                        src={
+                          project.image ||
+                          "https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?auto=format&fit=crop&q=80&w=1600"
+                        }
+                        alt={project.title}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-[2s] ease-expo opacity-80 group-hover:opacity-100"
+                      />
                     </div>
-                  </div>
-                </div>
 
-                {/* Sub-Card Content */}
-                <div className="mt-10 flex flex-col space-y-4">
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-4xl md:text-5xl font-black font-syne text-white uppercase tracking-tighter group-hover:text-primary transition-colors duration-500">
-                      {project.title}
-                    </h3>
-                    <span className="font-mono text-[10px] text-gray-500 italic mt-2">
-                      {project.year}
-                    </span>
-                  </div>
-
-                  <div className="h-px w-full bg-white/5 group-hover:bg-primary/20 transition-colors duration-1000"></div>
-
-                  <div className="flex justify-between">
-                    <p className="text-xs font-mono text-gray-500 uppercase tracking-widest">
-                      {project.type}
-                    </p>
-                    <div className="overflow-hidden">
-                      <span className="block text-[10px] font-mono text-primary uppercase translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-                        Explore Archive
+                    {/* Discrete Corner Detail */}
+                    <div className="absolute top-8 left-8 z-10">
+                      <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest bg-black/40 backdrop-blur-md px-3 py-1 border border-white/5 rounded-full">
+                        {String(index + 1).padStart(2, "0")}
                       </span>
                     </div>
+
+                    {/* Hover Action Overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-700 backdrop-blur-[2px]">
+                      <div className="w-20 h-20 rounded-full border border-white/20 flex items-center justify-center text-white scale-50 group-hover:scale-100 transition-all duration-700 ease-expo">
+                        <ArrowUpRight size={32} />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            </div>
-          ))}
+
+                  {/* Sub-Card Content */}
+                  <div className="mt-10 flex flex-col space-y-4">
+                    <div className="flex justify-between items-start">
+                      <h3 className="text-4xl md:text-5xl font-black font-syne text-white uppercase tracking-tighter group-hover:text-primary transition-colors duration-500">
+                        {project.title}
+                      </h3>
+                      <span className="font-mono text-[10px] text-gray-500 italic mt-2">
+                        {project.year || "2024"}
+                      </span>
+                    </div>
+
+                    <div className="h-px w-full bg-white/5 group-hover:bg-primary/20 transition-colors duration-1000"></div>
+
+                    <div className="flex justify-between">
+                      <p className="text-xs font-mono text-gray-500 uppercase tracking-widest">
+                        {project.type || project.subtitle || "Digital Product"}
+                      </p>
+                      <div className="overflow-hidden">
+                        <span className="block text-[10px] font-mono text-primary uppercase translate-y-full group-hover:translate-y-0 transition-transform duration-500">
+                          Explore Archive
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            ))
+          )}
         </div>
 
         {/* Foot CTA */}

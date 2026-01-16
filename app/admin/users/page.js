@@ -1,82 +1,117 @@
 "use client";
 
+import ConfirmationModal from "@/components/admin/ConfirmationModal";
+import { deleteUser, getUsers } from "@/lib/api";
 import gsap from "gsap";
 import {
   AlertCircle,
-  CheckCircle2,
   Clock,
+  Edit3,
+  Loader2,
   Mail,
-  MoreVertical,
   Search,
   Shield,
+  Trash2,
   UserPlus,
-  XCircle,
 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-
-const mockUsers = [
-  {
-    id: 1,
-    name: "Mezanur Rahman",
-    email: "mezan@example.com",
-    role: "Super Admin",
-    status: "Active",
-    lastLogin: "Just now",
-    avatar: "M",
-  },
-  {
-    id: 2,
-    name: "Alex Johnson",
-    email: "alex@example.com",
-    role: "Editor",
-    status: "Active",
-    lastLogin: "2 hours ago",
-    avatar: "A",
-  },
-  {
-    id: 3,
-    name: "Sarah Chen",
-    email: "sarah@example.com",
-    role: "Admin",
-    status: "Suspended",
-    lastLogin: "3 days ago",
-    avatar: "S",
-  },
-  {
-    id: 4,
-    name: "Michael Ross",
-    email: "michael@example.com",
-    role: "Editor",
-    status: "Active",
-    lastLogin: "5 hours ago",
-    avatar: "M",
-  },
-];
 
 export default function UsersPage() {
   const containerRef = useRef(null);
-  const [users, setUsers] = useState(mockUsers);
+  const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
 
+  // Fetch users from API
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.set(".animate-in", { opacity: 0, y: 30 });
-      gsap.to(".animate-in", {
-        y: 0,
-        opacity: 1,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: "power3.out",
-        clearProps: "all",
-      });
-    }, containerRef);
-    return () => ctx.revert();
+    fetchUsers();
   }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const res = await getUsers();
+      if (res.success) {
+        setUsers(res.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Animate on mount
+  useEffect(() => {
+    if (!loading && users.length > 0) {
+      const ctx = gsap.context(() => {
+        gsap.set(".animate-in", { opacity: 0, y: 30 });
+        gsap.to(".animate-in", {
+          y: 0,
+          opacity: 1,
+          duration: 0.8,
+          stagger: 0.1,
+          ease: "power3.out",
+          clearProps: "all",
+        });
+      }, containerRef);
+      return () => ctx.revert();
+    }
+  }, [loading, users]);
+
+  const handleDeleteClick = (user) => {
+    setUserToDelete(user);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete) return;
+
+    try {
+      await deleteUser(userToDelete._id);
+      setUsers(users.filter((u) => u._id !== userToDelete._id));
+      setDeleteModalOpen(false);
+      setUserToDelete(null);
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+      alert("Failed to delete user. Please try again.");
+    }
+  };
+
+  // Format role for display (e.g., "super_admin" → "Super Admin")
+  const formatRole = (role) => {
+    if (!role) return "User";
+    return role
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
+  // Format date for last login
+  const formatLastLogin = (date) => {
+    if (!date) return "Never";
+    const loginDate = new Date(date);
+    const now = new Date();
+    const diffMs = now - loginDate;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? "s" : ""} ago`;
+    if (diffHours < 24)
+      return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+    return loginDate.toLocaleDateString();
+  };
 
   const filteredUsers = users.filter(
     (user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+      user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -96,10 +131,12 @@ export default function UsersPage() {
           </p>
         </div>
 
-        <button className="animate-in group flex items-center gap-3 px-8 py-3 bg-primary text-black font-bold font-syne uppercase tracking-wider rounded-full hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(180,255,0,0.3)]">
-          <UserPlus size={18} />
-          <span>Add New Member</span>
-        </button>
+        <Link href="/admin/users/add">
+          <button className="animate-in group flex items-center gap-3 px-8 py-3 bg-primary text-black font-bold font-syne uppercase cursor-pointer tracking-wider rounded-full hover:bg-white transition-all shadow-[0_0_20px_rgba(180,255,0,0.3)] hover:shadow-[0_0_30px_rgba(180,255,0,0.5)]">
+            <UserPlus size={18} />
+            <span>Add New Member</span>
+          </button>
+        </Link>
       </div>
 
       {/* Search & Stats Bar */}
@@ -124,7 +161,7 @@ export default function UsersPage() {
           </div>
           <div className="flex items-center gap-1.5 px-3 py-2">
             <span className="text-green-400 font-bold">
-              {users.filter((u) => u.status === "Active").length}
+              {users.filter((u) => u.role !== "suspended").length}
             </span>{" "}
             Active
           </div>
@@ -137,94 +174,110 @@ export default function UsersPage() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/5 blur-[100px] pointer-events-none"></div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-white/5">
-                <th className="px-8 py-6 text-[10px] font-mono uppercase tracking-[0.2em] text-gray-500">
-                  Member
-                </th>
-                <th className="px-8 py-6 text-[10px] font-mono uppercase tracking-[0.2em] text-gray-500">
-                  Role
-                </th>
-                <th className="px-8 py-6 text-[10px] font-mono uppercase tracking-[0.2em] text-gray-500">
-                  Status
-                </th>
-                <th className="px-8 py-6 text-[10px] font-mono uppercase tracking-[0.2em] text-gray-500">
-                  Last Login
-                </th>
-                <th className="px-8 py-6 text-[10px] font-mono uppercase tracking-[0.2em] text-gray-500 text-right">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.03]">
-              {filteredUsers.map((user) => (
-                <tr
-                  key={user.id}
-                  className="group hover:bg-white/[0.02] transition-colors relative"
-                >
-                  <td className="px-8 py-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-white/10 to-white/5 border border-white/10 flex items-center justify-center text-lg font-bold text-white group-hover:scale-110 transition-transform">
-                        {user.avatar}
-                      </div>
-                      <div>
-                        <p className="font-bold text-white group-hover:text-primary transition-colors">
-                          {user.name}
-                        </p>
-                        <p className="text-xs text-gray-500 flex items-center gap-1.5 mt-1">
-                          <Mail size={12} />
-                          {user.email}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-8 py-6">
-                    <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono uppercase tracking-widest text-gray-300">
-                      <Shield size={12} className="text-primary" />
-                      {user.role}
-                    </span>
-                  </td>
-                  <td className="px-8 py-6">
-                    {user.status === "Active" ? (
-                      <span className="inline-flex items-center gap-1.5 text-green-400 text-[10px] font-mono uppercase tracking-widest">
-                        <CheckCircle2 size={12} />
-                        Active
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 text-red-400 text-[10px] font-mono uppercase tracking-widest">
-                        <XCircle size={12} />
-                        Suspended
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-8 py-6">
-                    <div className="flex items-center gap-2 text-xs text-gray-500 font-mono italic">
-                      <Clock size={12} />
-                      {user.lastLogin}
-                    </div>
-                  </td>
-                  <td className="px-8 py-6 text-right">
-                    <button className="p-2 text-gray-600 hover:text-white hover:bg-white/5 rounded-lg transition-all">
-                      <MoreVertical size={20} />
-                    </button>
-                  </td>
+        {loading ? (
+          <div className="flex items-center justify-center py-32">
+            <Loader2 size={40} className="text-primary animate-spin" />
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-white/5">
+                  <th className="px-8 py-6 text-[10px] font-mono uppercase tracking-[0.2em] text-gray-500">
+                    Member
+                  </th>
+                  <th className="px-8 py-6 text-[10px] font-mono uppercase tracking-[0.2em] text-gray-500">
+                    Role
+                  </th>
+                  <th className="px-8 py-6 text-[10px] font-mono uppercase tracking-[0.2em] text-gray-500">
+                    Last Login
+                  </th>
+                  <th className="px-8 py-6 text-[10px] font-mono uppercase tracking-[0.2em] text-gray-500 text-right">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-white/[0.03]">
+                {filteredUsers.map((user) => (
+                  <tr
+                    key={user._id}
+                    className="group hover:bg-white/[0.02] transition-colors relative"
+                  >
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-white/10 to-white/5 border border-white/10 flex items-center justify-center text-lg font-bold text-white group-hover:scale-110 transition-transform">
+                          {user.name?.charAt(0).toUpperCase() || "U"}
+                        </div>
+                        <div>
+                          <p className="font-bold text-white group-hover:text-primary transition-colors">
+                            {user.name}
+                          </p>
+                          <p className="text-xs text-gray-500 flex items-center gap-1.5 mt-1">
+                            <Mail size={12} />
+                            {user.email}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono uppercase tracking-widest text-gray-300">
+                        <Shield size={12} className="text-primary" />
+                        {formatRole(user.role)}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-2 text-xs text-gray-500 font-mono italic">
+                        <Clock size={12} />
+                        {formatLastLogin(user.lastLogin)}
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link href={`/admin/users/edit/${user._id}`}>
+                          <button className="p-2 text-gray-600 hover:text-primary hover:bg-white/5 rounded-lg transition-all group/edit">
+                            <Edit3 size={18} />
+                          </button>
+                        </Link>
+                        <button
+                          onClick={() => handleDeleteClick(user)}
+                          className="p-2 text-gray-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all group/delete"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-        {filteredUsers.length === 0 && (
+        {!loading && filteredUsers.length === 0 && (
           <div className="py-20 text-center">
             <AlertCircle size={40} className="mx-auto text-gray-800 mb-4" />
             <p className="text-gray-500 font-mono text-sm uppercase tracking-widest">
-              No members found matching your search
+              {users.length === 0
+                ? "No team members yet. Add your first member!"
+                : "No members found matching your search"}
             </p>
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setUserToDelete(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Delete User"
+        message={`Are you sure you want to delete "${userToDelete?.name}"? This action cannot be undone.`}
+        confirmText="Delete User"
+        confirmButtonClass="bg-red-500 hover:bg-red-600"
+      />
     </div>
   );
 }

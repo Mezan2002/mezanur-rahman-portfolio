@@ -134,7 +134,8 @@ const TiptapEditor = ({ content, onChange }) => {
     },
     editorProps: {
       attributes: {
-        class: "focus:outline-none min-h-[300px]",
+        class:
+          "focus:outline-none min-h-[500px] prose prose-invert prose-lg max-w-none",
       },
     },
     immediatelyRender: false,

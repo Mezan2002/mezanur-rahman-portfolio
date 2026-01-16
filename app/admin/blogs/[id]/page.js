@@ -1,110 +1,265 @@
 "use client";
 
+import { getBlogById, getBlogs } from "@/lib/api";
 import gsap from "gsap";
-import { ArrowLeft, Calendar, Eye, PenTool } from "lucide-react";
+import parse from "html-react-parser";
+import { ArrowLeft, Calendar, Eye, Loader2, PenTool } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
-export default function BlogPreviewPage({ params }) {
+export default function BlogPreviewPage() {
   const containerRef = useRef(null);
   const router = useRouter();
+  const params = useParams();
+  const id = params.id;
 
-  // Mock Data (In a real app, fetch based on params.id)
-  const blog = {
-    id: params.id,
-    title: "The Evolution of Digital Aesthetics",
-    content: `
-      <p class="mb-6 leading-relaxed text-gray-300">In the rapidly evolving landscape of digital design, the concept of aesthetics has transcended mere visual appeal to become a fundamental component of user experience. We are witnessing a shift from flat, utilitarian interfaces to rich, immersive environments that prioritize depth, motion, and emotional connection.</p>
-      
-      <h2 class="text-2xl font-bold font-syne text-white mb-4 mt-8">The Return of Depth</h2>
-      <p class="mb-6 leading-relaxed text-gray-300">Gone are the days of strict flat design. Modern interfaces are embracing glassmorphism, neumorphism, and 3D elements to create a sense of hierarchy and tactile realism. This "digital materiality" helps users intuitively understand the structure of an application.</p>
-      
-      <blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-white/80 bg-white/5 rounded-r-lg">
-        "Design is not just what it looks like and feels like. Design is how it works." — Steve Jobs
-      </blockquote>
-
-      <h2 class="text-2xl font-bold font-syne text-white mb-4 mt-8">Motion as Meaning</h2>
-      <p class="mb-6 leading-relaxed text-gray-300">Animation is no longer a delight factor; it is a necessity. Motion guides the eye, provides feedback, and tells a story. From subtle micro-interactions to sweeping page transitions, motion design is the glue that holds the user journey together.</p>
-    `,
-    category: "Design",
-    status: "Published",
-    views: "1.2k",
-    date: "Oct 24, 2025",
-    image:
-      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop",
-  };
+  const [blog, setBlog] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(".animate-enter", {
-        y: 30,
-        opacity: 0,
-        duration: 1,
-        stagger: 0.1,
-        ease: "power3.out",
-      });
-    }, containerRef);
-    return () => ctx.revert();
-  }, []);
+    const fetchBlog = async () => {
+      try {
+        // 1. Try fetching specifically by ID
+        let res = await getBlogById(id).catch(() => ({ data: null }));
+        let blogData = res.data;
 
-  return (
-    <div ref={containerRef} className="min-h-screen pb-20">
-      {/* Top Bar */}
-      <div className="flex items-center justify-between mb-8 animate-enter">
+        // 2. Fallback: fetch all if specific ID fetch fails
+        if (!blogData) {
+          try {
+            const allBlogsRes = await getBlogs();
+            const allBlogs = allBlogsRes.data || [];
+            blogData = allBlogs.find((b) => (b._id || b.id) === id);
+          } catch (fallbackErr) {
+            console.error("Fallback fetch failed", fallbackErr);
+          }
+        }
+
+        if (!blogData) {
+          throw new Error("Post not found");
+        }
+
+        setBlog(blogData);
+      } catch (err) {
+        setError(err.message || "Failed to fetch blog post");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlog();
+  }, [id]);
+
+  useEffect(() => {
+    if (!loading && blog) {
+      const ctx = gsap.context(() => {
+        gsap.from(".animate-enter", {
+          y: 50,
+          opacity: 0,
+          duration: 1.2,
+          stagger: 0.15,
+          ease: "power4.out",
+        });
+      }, containerRef);
+      return () => ctx.revert();
+    }
+  }, [loading, blog]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-6">
+        <Loader2 className="w-16 h-16 text-primary animate-spin" />
+        <p className="text-gray-500 font-mono text-sm uppercase tracking-widest">
+          Loading article...
+        </p>
+      </div>
+    );
+  }
+
+  if (error || !blog) {
+    return (
+      <div className="min-h-screen py-20 px-10 max-w-4xl mx-auto">
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors uppercase tracking-widest text-xs font-bold"
+          className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-12 text-sm uppercase tracking-wide"
         >
-          <ArrowLeft size={16} />
-          Back to Blogs
+          <ArrowLeft size={18} /> Back
         </button>
-
-        <div className="flex items-center gap-4">
-          <span className="px-3 py-1 bg-green-500/10 text-green-500 text-xs font-mono uppercase tracking-widest border border-green-500/20 rounded">
-            {blog.status}
-          </span>
-          <Link
-            href={`/admin/blogs/edit/${blog.id}`}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-black font-bold uppercase tracking-wider rounded hover:bg-white transition-colors text-xs"
-          >
-            <PenTool size={14} />
-            Edit Post
-          </Link>
+        <div className="p-12 border border-red-500/20 bg-red-500/5 rounded-3xl text-red-400 text-center">
+          <p className="text-2xl font-bold font-syne mb-2">Article Not Found</p>
+          <p className="text-sm text-gray-500">
+            {error || "This post doesn't exist"}
+          </p>
         </div>
       </div>
+    );
+  }
 
-      {/* Hero Image */}
-      <div className="relative w-full h-[400px] rounded-3xl overflow-hidden mb-12 animate-enter group">
-        <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent z-10"></div>
-        <img
-          src={blog.image}
-          alt={blog.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
-        />
-        <div className="absolute bottom-0 left-0 p-10 z-20 w-full">
-          <div className="flex items-center gap-6 mb-4 text-xs font-mono uppercase tracking-widest text-gray-300">
-            <span className="bg-white/10 px-3 py-1 rounded backdrop-blur-md text-white border border-white/10">
-              {blog.category}
+  return (
+    <div ref={containerRef} className="min-h-screen">
+      {/* Refined Header */}
+      <header className="border-b border-white/5 py-8 mb-16 animate-enter">
+        <div className="max-w-5xl mx-auto flex items-center justify-between">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors group"
+          >
+            <ArrowLeft
+              size={20}
+              className="group-hover:-translate-x-1 transition-transform"
+            />
+            <span className="text-sm uppercase tracking-wider">
+              Back to Articles
             </span>
-            <span className="flex items-center gap-2">
-              <Calendar size={14} /> {blog.date}
+          </button>
+
+          <div className="flex items-center gap-4">
+            <span
+              className={`px-4 py-1.5 text-xs uppercase tracking-wider font-medium rounded-full ${
+                blog.status === "Published" || blog.status === "published"
+                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                  : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+              }`}
+            >
+              {blog.status}
             </span>
-            <span className="flex items-center gap-2">
-              <Eye size={14} /> {blog.views} Views
-            </span>
+            <Link
+              href={`/admin/blogs/edit/${blog._id || blog.id}`}
+              className="flex items-center gap-2 px-6 py-2.5 bg-white text-black font-bold uppercase tracking-wider rounded-full hover:bg-primary transition-colors text-xs"
+            >
+              <PenTool size={16} />
+              Edit Article
+            </Link>
           </div>
-          <h1 className="text-4xl md:text-5xl font-black font-syne text-white leading-tight max-w-4xl drop-shadow-2xl">
+        </div>
+      </header>
+
+      {/* Article Header */}
+      <article className="max-w-5xl mx-auto space-y-16">
+        {/* Meta & Title */}
+        <div className="space-y-8 animate-enter">
+          {/* Meta Information */}
+          <div className="flex flex-wrap items-center gap-6 text-sm text-gray-400">
+            <div className="flex items-center gap-2">
+              <Calendar size={16} />
+              <time className="uppercase tracking-wide">
+                {new Date(
+                  blog.publishedAt || blog.createdAt || Date.now()
+                ).toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </time>
+            </div>
+
+            <span className="text-gray-700">•</span>
+
+            <div className="flex items-center gap-2">
+              <Eye size={16} />
+              <span>{blog.views || 0} views</span>
+            </div>
+
+            {blog.readTime && (
+              <>
+                <span className="text-gray-700">•</span>
+                <span className="text-primary">{blog.readTime}</span>
+              </>
+            )}
+
+            {blog.category && (
+              <>
+                <span className="text-gray-700">•</span>
+                <span className="text-primary uppercase tracking-wider font-medium">
+                  {typeof blog.category === "object"
+                    ? blog.category.name
+                    : blog.category}
+                </span>
+              </>
+            )}
+          </div>
+
+          {/* Title */}
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-black font-syne text-white leading-[1.05] tracking-tight">
             {blog.title}
           </h1>
-        </div>
-      </div>
 
-      {/* Content Body */}
-      <div
-        className="max-w-3xl mx-auto prose prose-invert prose-lg animate-enter"
-        dangerouslySetInnerHTML={{ __html: blog.content }}
-      />
+          {/* Excerpt/Description if available */}
+          {blog.excerpt && (
+            <p className="text-xl md:text-2xl text-gray-400 leading-relaxed max-w-3xl">
+              {blog.excerpt}
+            </p>
+          )}
+        </div>
+
+        {/* Featured Image */}
+        <figure className="w-full aspect-[21/9] rounded-3xl overflow-hidden animate-enter">
+          <Image
+            src={
+              blog.featuredImage ||
+              blog.image ||
+              "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"
+            }
+            alt={blog.title}
+            width={1920}
+            height={1080}
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000"
+          />
+        </figure>
+
+        {/* Article Content */}
+        <div className="max-w-3xl mx-auto prose prose-invert prose-lg md:prose-xl animate-enter selection:bg-primary/30 prose-headings:font-syne prose-headings:font-black prose-headings:tracking-tight prose-p:text-gray-300 prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-white prose-code:text-primary prose-code:bg-white/5 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-pre:bg-white/5 prose-pre:border prose-pre:border-white/10">
+          {parse(blog.content || "")}
+        </div>
+
+        {/* Tags */}
+        {blog.tags && blog.tags.length > 0 && (
+          <div className="max-w-3xl mx-auto pt-12 border-t border-white/5 animate-enter">
+            <div className="flex items-start gap-6">
+              <span className="text-sm text-gray-500 uppercase tracking-wider font-medium pt-2">
+                Tagged
+              </span>
+              <div className="flex flex-wrap gap-3 flex-1">
+                {blog.tags.map((tag, i) => (
+                  <span
+                    key={i}
+                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm text-gray-400 hover:text-white hover:border-white/20 transition-colors uppercase tracking-wide"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Bottom CTA */}
+        <div className="pt-16 pb-24 border-t border-white/5 animate-enter">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-8">
+            <div>
+              <p className="text-sm text-gray-500 uppercase tracking-wider mb-2">
+                Ready to make changes?
+              </p>
+              <h3 className="text-2xl font-bold font-syne text-white">
+                Edit this article
+              </h3>
+            </div>
+            <Link
+              href={`/admin/blogs/edit/${blog._id || blog.id}`}
+              className="px-8 py-4 bg-white text-black font-bold uppercase tracking-wider rounded-full hover:bg-primary transition-colors text-sm flex items-center gap-3 group"
+            >
+              <PenTool size={18} />
+              Open Editor
+              <ArrowLeft
+                size={18}
+                className="rotate-180 group-hover:translate-x-1 transition-transform"
+              />
+            </Link>
+          </div>
+        </div>
+      </article>
     </div>
   );
 }

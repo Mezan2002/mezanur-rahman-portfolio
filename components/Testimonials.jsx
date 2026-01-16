@@ -1,88 +1,47 @@
 "use client";
 
+import { getTestimonials } from "@/lib/api";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import parse from "html-react-parser";
 import { ArrowLeft, ArrowRight, Quote, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
-
-const testimonials = [
-  {
-    id: 1,
-    name: "Sarah Chen",
-    role: "CEO, TechFlow",
-    content:
-      "Working with Mezanur was transformative for our product. His attention to detail and ability to translate complex requirements into elegant solutions is unmatched.",
-    image:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200",
-    rating: 5,
-  },
-  {
-    id: 2,
-    name: "James Wilson",
-    role: "CTO, FinanceHub",
-    content:
-      "Exceptional developer who understands both the technical and business side. The dashboard he built increased our user engagement by 40%.",
-    image:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200",
-    rating: 5,
-  },
-  {
-    id: 3,
-    name: "Emily Rodriguez",
-    role: "Product Manager, Cloudify",
-    content:
-      "Mezanur doesn't just code—he thinks like a product designer. His GSAP animations brought our brand to life in ways we never imagined.",
-    image:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200",
-    rating: 5,
-  },
-  {
-    id: 4,
-    name: "Michael Ross",
-    role: "Founding Engineer, ScaleUp",
-    content:
-      "The level of craftsmanship in his code is rare. He delivered a high-performance application that exceeded all our speed benchmarks.",
-    image:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200",
-    rating: 5,
-  },
-  {
-    id: 5,
-    name: "Jessica Lee",
-    role: "Director of UX, DesignFirst",
-    content:
-      "A truly creative mind who pushes the boundaries of web experiences. His work on our portfolio transition was flawless.",
-    image:
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200",
-    rating: 5,
-  },
-  {
-    id: 6,
-    name: "David Chen",
-    role: "Founder, Zenith AI",
-    content:
-      "Rare combination of aesthetic sense and technical depth. Mezanur is our go-to for high-end frontend development.",
-    image:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200",
-    rating: 5,
-  },
-];
 
 export default function Testimonials() {
   const sectionRef = useRef(null);
   const sliderRef = useRef(null);
+  const [testimonials, setTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const response = await getTestimonials();
+        if (response.data && response.data.length > 0) {
+          setTestimonials(response.data);
+        }
+      } catch (err) {
+        console.error("Testimonials: Fetch failed", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTestimonials();
+  }, []);
+
   const nextSlide = () => {
+    if (testimonials.length === 0) return;
     setCurrentIndex((prev) => (prev + 1) % testimonials.length);
   };
 
   const prevSlide = () => {
+    if (testimonials.length === 0) return;
     setCurrentIndex(
       (prev) => (prev - 1 + testimonials.length) % testimonials.length
     );
@@ -91,6 +50,8 @@ export default function Testimonials() {
   // 1. Entrance Reveal (Run Once)
   useGSAP(
     () => {
+      if (loading) return;
+
       const revealEntrance = () => {
         const cards = gsap.utils.toArray(
           ".testimonial-card",
@@ -98,10 +59,7 @@ export default function Testimonials() {
         );
         if (!cards || cards.length === 0) return;
 
-        // Set initial states immediately to prevent flicker
         gsap.set(cards, { y: 60, opacity: 0 });
-
-        // Ensure all triggers are refreshed before we calculate positions
         ScrollTrigger.refresh();
 
         gsap.to(cards, {
@@ -110,7 +68,6 @@ export default function Testimonials() {
           stagger: 0.1,
           duration: 1.2,
           ease: "power4.out",
-          immediateRender: false,
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 90%",
@@ -124,7 +81,6 @@ export default function Testimonials() {
         revealEntrance();
       } else {
         const handleTransition = () => {
-          // Double refresh safety to handle the transition columns disappearing
           ScrollTrigger.refresh();
           revealEntrance();
           window.removeEventListener(
@@ -140,7 +96,7 @@ export default function Testimonials() {
           );
       }
     },
-    { scope: sectionRef }
+    { dependencies: [loading], scope: sectionRef }
   );
 
   // 2. Slider Interaction (Run on currentIndex change)
@@ -157,7 +113,7 @@ export default function Testimonials() {
         ease: "power3.out",
       });
     },
-    { dependencies: [currentIndex], scope: sectionRef }
+    { dependencies: [currentIndex, testimonials], scope: sectionRef }
   );
 
   return (
@@ -209,53 +165,74 @@ export default function Testimonials() {
 
         {/* Slider Container */}
         <div className="relative overflow-visible">
-          <div
-            ref={sliderRef}
-            className="flex gap-8 transition-transform duration-500 ease-out"
-          >
-            {testimonials.map((testimonial) => (
-              <div
-                key={testimonial.id}
-                className="testimonial-card group flex-shrink-0 w-full md:w-[calc(50%-16px)] lg:w-[calc(33.333%-21.333px)] p-10 bg-white/1 border border-white/5 hover:border-white/10 transition-all duration-500 flex flex-col justify-between h-[450px]"
-              >
-                <div className="relative">
-                  <Quote className="w-8 h-8 text-primary/20 mb-6" />
-                  <div className="flex gap-1 mb-6">
-                    {Array.from({ length: testimonial.rating }).map((_, i) => (
-                      <Star
-                        key={i}
-                        size={12}
-                        className="fill-primary text-primary"
-                      />
-                    ))}
+          {loading ? (
+            <div className="flex gap-8">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="w-full md:w-[calc(50%-16px)] lg:w-[calc(33.333%-21.333px)] h-[450px] bg-white/5 animate-pulse"
+                ></div>
+              ))}
+            </div>
+          ) : testimonials.length === 0 ? (
+            <div className="py-20 text-center text-gray-500 font-mono uppercase tracking-widest border border-dashed border-white/10 rounded-2xl">
+              No client stories found in the database.
+            </div>
+          ) : (
+            <div
+              ref={sliderRef}
+              className="flex gap-8 transition-transform duration-500 ease-out"
+            >
+              {testimonials.map((testimonial) => (
+                <div
+                  key={testimonial._id || testimonial.id}
+                  className="testimonial-card group shrink-0 w-full md:w-[calc(50%-16px)] lg:w-[calc(33.333%-21.333px)] p-10 bg-white/1 border border-white/5 hover:border-white/10 transition-all duration-500 flex flex-col justify-between h-[450px]"
+                >
+                  <div className="relative">
+                    <Quote className="w-8 h-8 text-primary/20 mb-6" />
+                    <div className="flex gap-1 mb-6">
+                      {Array.from({ length: testimonial.rating || 5 }).map(
+                        (_, i) => (
+                          <Star
+                            key={i}
+                            size={12}
+                            className="fill-primary text-primary"
+                          />
+                        )
+                      )}
+                    </div>
+                    <div className="text-lg text-gray-400 leading-relaxed mb-10 group-hover:text-white transition-colors line-clamp-6">
+                      {parse(testimonial.content)}
+                    </div>
                   </div>
-                  <p className="text-lg text-gray-400 leading-relaxed mb-10 group-hover:text-white transition-colors">
-                    &ldquo;{testimonial.content.replace(/&apos;/g, "'")}&rdquo;
-                  </p>
-                </div>
 
-                <div className="flex items-center gap-4 pt-8 border-t border-white/5 mt-auto">
-                  <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 grayscale group-hover:grayscale-0 transition-all duration-500">
-                    <Image
-                      src={testimonial.image}
-                      alt={testimonial.name}
-                      width={48}
-                      height={48}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h4 className="text-white font-bold font-syne uppercase tracking-wider text-sm">
-                      {testimonial.name}
-                    </h4>
-                    <p className="text-[9px] text-gray-500 font-mono uppercase tracking-[0.2em]">
-                      {testimonial.role}
-                    </p>
+                  <div className="flex items-center gap-4 pt-8 border-t border-white/5 mt-auto">
+                    <div className="w-12 h-12 rounded-full overflow-hidden border border-white/10 grayscale group-hover:grayscale-0 transition-all duration-500 shrink-0">
+                      <Image
+                        src={
+                          testimonial.image ||
+                          testimonial.avatar ||
+                          "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200"
+                        }
+                        alt={testimonial.name}
+                        width={48}
+                        height={48}
+                        className="w-full h-full object-cover rounded-full"
+                      />
+                    </div>
+                    <div>
+                      <h4 className="text-white font-bold font-syne uppercase tracking-wider text-sm mb-1">
+                        {testimonial.name}
+                      </h4>
+                      <p className="text-[9px] text-gray-500 font-mono uppercase tracking-[0.2em]">
+                        {testimonial.role || testimonial.position}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Simple See All Link */}
