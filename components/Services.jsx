@@ -4,29 +4,29 @@ import { getServices } from "@/lib/api";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Image from "next/image";
+import * as Icons from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function Services() {
+export default function Services({ data = {} }) {
   const sectionRef = useRef(null);
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch services from API
+  // Fetch individual services from API
   useEffect(() => {
     const fetchServices = async () => {
       try {
         setLoading(true);
         const res = await getServices();
         if (res.success) {
-          // Map API data to component format - icon is now an image URL
+          // Map API data to component format - icon is now a Lucide icon name
           const mappedServices = res.data.map((service) => ({
             id: service._id,
             title: service.title,
             description: service.description,
-            iconUrl: service.icon, // Store icon URL from API
+            icon: service.icon, // Store icon name from API
             tags: service.tags || [],
           }));
           setServices(mappedServices);
@@ -40,7 +40,7 @@ export default function Services() {
             title: "Full-stack Dev",
             description:
               "Architecting robust web applications with cutting-edge technologies.",
-            iconUrl: null, // No icon image in fallback
+            icon: "Zap", // Use default icon name
             tags: ["React", "TypeScript", "Node.js"],
           },
         ]);
@@ -51,6 +51,25 @@ export default function Services() {
 
     fetchServices();
   }, []);
+
+  const getIcon = (iconName) => {
+    const Icon = Icons[iconName] || Icons.Zap;
+    return (
+      <Icon
+        size={35}
+        strokeWidth={1.2}
+        className="transition-all duration-500"
+      />
+    );
+  };
+
+  const titleLines = data?.title?.split(" ") || [
+    "Full",
+    "Spectrum",
+    "Services",
+  ];
+  const line1 = titleLines.slice(0, 2).join(" ");
+  const line2 = titleLines.slice(2).join(" ");
 
   useGSAP(
     () => {
@@ -110,18 +129,18 @@ export default function Services() {
         <div className="mb-24 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8">
           <div className="">
             <p className="text-gray-500 uppercase tracking-widest text-sm mb-4 font-mono">
-              ( Core Offerings )
+              {data?.tag || "( Core Offerings )"}
             </p>
             <h2 className="text-5xl md:text-7xl lg:text-8xl font-black font-syne text-white uppercase leading-[0.85]">
-              Full Spectrum
+              {line1}
               <br />
-              <span className="bg-white text-black">Services</span>
+              <span className="bg-white text-black">{line2 || "Services"}</span>
             </h2>
           </div>
           <div className="lg:text-right max-w-md">
             <p className="text-xl text-gray-400 font-light leading-relaxed">
-              Merging technical excellence with artistic vision to deliver
-              high-performance digital worlds.
+              {data?.description ||
+                "Merging technical excellence with artistic vision to deliver high-performance digital worlds."}
             </p>
           </div>
         </div>
@@ -135,21 +154,8 @@ export default function Services() {
             >
               <div className="space-y-8">
                 <div className="flex justify-between items-start">
-                  <div className="w-16 h-16 rounded-full border border-white/10 group-hover:border-primary flex items-center justify-center text-primary transition-all duration-500 overflow-hidden">
-                    {service.iconUrl &&
-                    (service.iconUrl.startsWith("http://") ||
-                      service.iconUrl.startsWith("https://") ||
-                      service.iconUrl.startsWith("/")) ? (
-                      <Image
-                        src={service.iconUrl}
-                        alt={service.title}
-                        width={35}
-                        height={35}
-                        className="object-contain invert transition-all duration-500"
-                      />
-                    ) : (
-                      <span className="text-2xl">⚡</span>
-                    )}
+                  <div className="w-16 h-16 rounded-full border border-white/10 group-hover:border-primary flex items-center justify-center text-primary transition-all duration-500">
+                    {getIcon(service.icon)}
                   </div>
                   <span className="font-mono text-sm text-gray-500 group-hover:text-white transition-colors">
                     0{index + 1}

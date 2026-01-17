@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function Pricing() {
+export default function Pricing({ data = {} }) {
   const sectionRef = useRef(null);
   const [tiers, setTiers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,6 +66,8 @@ export default function Pricing() {
     fetchPricing();
   }, []);
 
+  const titleLines = data?.title?.split(" ") || ["Transparent", "Investment"];
+
   useGSAP(
     () => {
       if (!loading && tiers.length > 0) {
@@ -119,12 +121,14 @@ export default function Pricing() {
         {/* Header - EXACT MATCH to Projects section style */}
         <div className="mb-24 text-center">
           <p className="text-gray-500 uppercase tracking-widest text-sm mb-4 font-mono">
-            ( Pricing Plans )
+            {data?.tag || "( Pricing Plans )"}
           </p>
           <h2 className="text-5xl md:text-7xl lg:text-8xl font-black font-syne text-white uppercase leading-[0.85]">
-            Transparent
+            {titleLines[0]}
             <br />
-            <span className="bg-white text-black">Investment</span>
+            <span className="bg-white text-black">
+              {titleLines.slice(1).join(" ") || "Investment"}
+            </span>
           </h2>
         </div>
 

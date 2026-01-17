@@ -5,26 +5,32 @@ import gsap from "gsap";
 import { ArrowUpRight, Copy, Mail } from "lucide-react";
 import { useRef, useState } from "react";
 
-export default function CTA() {
+export default function CTA({ data = {} }) {
   const containerRef = useRef(null);
   const buttonRef = useRef(null);
   const [copied, setCopied] = useState(false);
 
+  const contactEmail = data?.contactEmail || "hello@mezan.dev";
+
   const handleCopy = () => {
-    navigator.clipboard.writeText("hello@mezan.dev");
+    navigator.clipboard.writeText(contactEmail);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  const titleLines = data?.title?.split(" ") || ["Let'S", "Connect."];
 
   useGSAP(
     () => {
       // Magnetic Button with "Liquid" behavior
       const handleMouseMove = (e) => {
-        const rect = buttonRef.current.getBoundingClientRect();
+        const btn = buttonRef.current;
+        if (!btn) return;
+        const rect = btn.getBoundingClientRect();
         const x = e.clientX - rect.left - rect.width / 2;
         const y = e.clientY - rect.top - rect.height / 2;
 
-        gsap.to(buttonRef.current, {
+        gsap.to(btn, {
           x: x * 0.35,
           y: y * 0.35,
           duration: 0.6,
@@ -49,8 +55,10 @@ export default function CTA() {
       };
 
       const btn = buttonRef.current;
-      btn.addEventListener("mousemove", handleMouseMove);
-      btn.addEventListener("mouseleave", handleMouseLeave);
+      if (btn) {
+        btn.addEventListener("mousemove", handleMouseMove);
+        btn.addEventListener("mouseleave", handleMouseLeave);
+      }
 
       // Reveal Animation
       const runAnimations = () => {
@@ -89,14 +97,18 @@ export default function CTA() {
         window.addEventListener("page-transition-complete", runAnimations);
         return () => {
           window.removeEventListener("page-transition-complete", runAnimations);
-          btn.removeEventListener("mousemove", handleMouseMove);
-          btn.removeEventListener("mouseleave", handleMouseLeave);
+          if (btn) {
+            btn.removeEventListener("mousemove", handleMouseMove);
+            btn.removeEventListener("mouseleave", handleMouseLeave);
+          }
         };
       }
 
       return () => {
-        btn.removeEventListener("mousemove", handleMouseMove);
-        btn.removeEventListener("mouseleave", handleMouseLeave);
+        if (btn) {
+          btn.removeEventListener("mousemove", handleMouseMove);
+          btn.removeEventListener("mouseleave", handleMouseLeave);
+        }
       };
     },
     { scope: containerRef }
@@ -114,13 +126,13 @@ export default function CTA() {
       <div className="relative z-10 w-full px-6 md:px-12 flex flex-col items-start gap-12">
         <div className="flex items-center gap-4 text-white/20 font-mono text-[10px] tracking-[0.5em] uppercase">
           <div className="w-8 h-px bg-white/20" />
-          Final_Sequence
+          {data?.tag || "Final_Sequence"}
         </div>
 
         <h2 className="executive-header text-[12vw] font-black uppercase tracking-tighter leading-none flex flex-col">
-          <span>Let&apos;S</span>
+          <span>{titleLines[0]}</span>
           <span className="bg-white text-black inline-block px-4 self-start">
-            Connect.
+            {titleLines.slice(1).join(" ") || "Connect."}
           </span>
         </h2>
       </div>
@@ -137,7 +149,9 @@ export default function CTA() {
             </span>
             <div className="flex flex-col gap-6">
               <a
-                href="#"
+                href={data?.socialLinks?.linkedin || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center justify-between text-xl font-bold group-hover:text-primary transition-colors"
               >
                 LinkedIn{" "}
@@ -147,7 +161,9 @@ export default function CTA() {
                 />
               </a>
               <a
-                href="#"
+                href={data?.socialLinks?.github || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center justify-between text-xl font-bold group-hover:text-primary transition-colors"
               >
                 GitHub{" "}
@@ -166,10 +182,10 @@ export default function CTA() {
             </span>
             <div className="space-y-4">
               <a
-                href="mailto:hello@mezan.dev"
+                href={`mailto:${contactEmail}`}
                 className="block text-2xl font-bold hover:text-primary transition-colors truncate"
               >
-                hello@mezan.dev
+                {contactEmail}
               </a>
               <button
                 onClick={handleCopy}
@@ -189,10 +205,13 @@ export default function CTA() {
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                <span className="text-xl font-bold">Open for Project</span>
+                <span className="text-xl font-bold">
+                  {data?.availabilityStatus || "Open for Project"}
+                </span>
               </div>
               <p className="text-sm text-white/40 leading-relaxed font-light">
-                Global outreach active. Currently based in Dhaka [UTC+6].
+                {data?.locationStatus ||
+                  "Global outreach active. Currently based in Dhaka [UTC+6]."}
               </p>
             </div>
           </div>

@@ -3,8 +3,7 @@
 import ConfirmationModal from "@/components/admin/ConfirmationModal";
 import { deleteService, getServices } from "@/lib/api";
 import gsap from "gsap";
-import { Edit2, Plus, Search, Trash2 } from "lucide-react";
-import Image from "next/image";
+import * as Icons from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
@@ -74,6 +73,11 @@ export default function ServicesPage() {
     service.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const getIcon = (iconName) => {
+    const Icon = Icons[iconName] || Icons.Zap;
+    return <Icon size={24} strokeWidth={1.5} />;
+  };
+
   return (
     <div ref={containerRef} className="space-y-8 min-h-screen">
       {/* Header & Controls */}
@@ -91,7 +95,7 @@ export default function ServicesPage() {
           <div className="relative group">
             <div className="absolute inset-0 bg-primary/20 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500"></div>
             <div className="relative bg-white/5 border border-white/10 rounded-full flex items-center px-4 py-3 w-64 backdrop-blur-md focus-within:border-primary/50 transition-colors">
-              <Search size={16} className="text-gray-400 mr-2" />
+              <Icons.Search size={16} className="text-gray-400 mr-2" />
               <input
                 type="text"
                 placeholder="Search services..."
@@ -107,7 +111,7 @@ export default function ServicesPage() {
             className="group relative px-6 py-3 bg-white text-black font-bold font-syne uppercase tracking-wider rounded-full overflow-hidden hover:scale-105 transition-transform"
           >
             <span className="relative z-10 flex items-center gap-2">
-              <Plus size={18} />
+              <Icons.Plus size={18} />
               <span>Create</span>
             </span>
             <div className="absolute inset-0 bg-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -137,21 +141,8 @@ export default function ServicesPage() {
             >
               <div className="space-y-8 relative z-10">
                 <div className="flex justify-between items-start">
-                  <div className="w-16 h-16 rounded-full border border-white/10 flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary group-hover:border-primary group-hover:text-black transition-all duration-500 text-2xl font-bold font-syne overflow-hidden">
-                    {service?.icon &&
-                    (service.icon.startsWith("http://") ||
-                      service.icon.startsWith("https://") ||
-                      service.icon.startsWith("/")) ? (
-                      <Image
-                        src={service.icon}
-                        alt={service.title}
-                        width={40}
-                        height={40}
-                        className="object-cover"
-                      />
-                    ) : (
-                      "⭐"
-                    )}
+                  <div className="w-16 h-16 rounded-full border border-white/10 flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary group-hover:border-primary group-hover:text-black transition-all duration-500 text-2xl font-bold font-syne">
+                    {getIcon(service.icon)}
                   </div>
                   <div className="flex flex-col items-end gap-3">
                     <span className="font-mono text-sm text-gray-500 group-hover:text-white transition-colors">
@@ -167,7 +158,7 @@ export default function ServicesPage() {
                         className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-gray-400 hover:bg-white hover:text-black hover:border-white transition-all"
                         title="Edit Service"
                       >
-                        <Edit2 size={14} />
+                        <Icons.Edit2 size={14} />
                       </Link>
                       <button
                         onClick={(e) => {
@@ -177,7 +168,7 @@ export default function ServicesPage() {
                         className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-gray-400 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"
                         title="Delete Service"
                       >
-                        <Trash2 size={14} />
+                        <Icons.Trash2 size={14} />
                       </button>
                     </div>
                   </div>
@@ -215,7 +206,7 @@ export default function ServicesPage() {
             className="group flex flex-col items-center justify-center min-h-[300px] border-2 border-dashed border-white/10 hover:border-primary/30 hover:bg-primary/5 transition-all duration-500"
           >
             <div className="w-16 h-16 rounded-full border-2 border-white/10 group-hover:border-primary flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-              <Plus
+              <Icons.Plus
                 size={24}
                 className="text-gray-600 group-hover:text-primary transition-colors"
               />

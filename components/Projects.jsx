@@ -11,7 +11,7 @@ import { useEffect, useRef, useState } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function Projects() {
+export default function Projects({ data = {} }) {
   const containerRef = useRef(null);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,6 +31,8 @@ export default function Projects() {
     };
     fetchProjects();
   }, []);
+
+  const titleLines = data?.title?.split(" ") || ["Studio", "Archive"];
 
   useGSAP(
     () => {
@@ -108,19 +110,21 @@ export default function Projects() {
             <div className="flex items-center gap-4">
               <div className="w-12 h-px bg-primary/40"></div>
               <p className="text-gray-500 uppercase tracking-[0.4em] text-[10px] font-mono">
-                Select Works // 2023 - 2026
+                {data?.tag || "Select Works // 2023 - 2026"}
               </p>
             </div>
             <h2 className="text-7xl md:text-9xl font-black font-syne text-white uppercase leading-[0.8] tracking-tighter">
-              Studio
+              {titleLines[0]}
               <br />
-              <span className="text-primary italic">Archive</span>
+              <span className="text-primary italic">
+                {titleLines.slice(1).join(" ") || "Archive"}
+              </span>
             </h2>
           </div>
           <div className="lg:text-right max-w-sm">
             <p className="text-xl text-gray-500 font-light leading-relaxed">
-              Precision-engineered digital products that merge architectural
-              clarity with high-fidelity interaction.
+              {data?.description ||
+                "Precision-engineered digital products that merge architectural clarity with high-fidelity interaction."}
             </p>
           </div>
         </div>

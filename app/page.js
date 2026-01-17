@@ -9,18 +9,36 @@ import Projects from "@/components/Projects";
 import Services from "@/components/Services";
 import Skills from "@/components/Skills";
 import Testimonials from "@/components/Testimonials";
+import { getSiteSettings } from "@/lib/api";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const [settings, setSettings] = useState(null);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await getSiteSettings();
+        if (response.success) {
+          setSettings(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching site settings:", error);
+      }
+    };
+    fetchSettings();
+  }, []);
+
   return (
     <main className="min-h-screen bg-dark-background selection:bg-primary selection:text-white">
-      <Hero />
-      <About />
-      <Services />
+      <Hero data={settings?.hero} />
+      <About data={settings?.about} />
+      <Services data={settings?.services} />
       <Skills />
-      <Projects />
-      <Pricing />
-      <Testimonials />
-      <CTA />
+      <Projects data={settings?.projects} />
+      <Pricing data={settings?.pricing} />
+      <Testimonials data={settings?.testimonials} />
+      <CTA data={settings?.cta} />
     </main>
   );
 }

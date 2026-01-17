@@ -4,7 +4,6 @@ import gsap from "gsap";
 import { ArrowLeft, Loader2, Save, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import ImageUploader from "./ImageUploader";
 
 export default function ServiceForm({
   initialData = {},
@@ -156,11 +155,17 @@ export default function ServiceForm({
         <div className="animate-in flex flex-col gap-8">
           {/* Row 1: Icon & Tags */}
           <div className="flex flex-wrap items-center gap-4 md:gap-8 pb-8 border-b border-white/5">
-            {/* Icon Upload */}
-            <div className="relative group min-w-[250px]">
-              <ImageUploader value={icon} onChange={(url) => setIcon(url)} />
-              <span className="absolute -top-8 left-0 text-[10px] font-mono uppercase tracking-widest text-gray-600 group-focus-within:text-primary transition-colors">
-                Icon Image Upload
+            {/* Icon Name Section */}
+            <div className="flex-1 min-w-[250px] relative group">
+              <input
+                type="text"
+                placeholder="e.g. Zap, Globe, Cpu..."
+                value={icon}
+                onChange={(e) => setIcon(e.target.value)}
+                className="w-full bg-transparent py-2 text-lg font-bold font-syne text-white placeholder-gray-700 outline-none border-none focus:placeholder-white/20 transition-all uppercase tracking-widest"
+              />
+              <span className="absolute -top-4 left-0 text-[10px] font-mono uppercase tracking-widest text-gray-600 group-focus-within:text-primary transition-colors">
+                Lucide Icon Name
               </span>
             </div>
 

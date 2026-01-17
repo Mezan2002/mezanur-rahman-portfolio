@@ -2,12 +2,59 @@
 
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { Code2, Compass, Layers } from "lucide-react";
+import * as Icons from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-export default function About() {
+export default function About({ data = {} }) {
   const containerRef = useRef(null);
   const [time, setTime] = useState("");
+
+  const getIcon = (iconName) => {
+    const Icon = Icons[iconName] || Icons.Code2;
+    return <Icon size={28} strokeWidth={1.5} />;
+  };
+
+  // Pillars Data from backend nested structure
+  const pillars = (data?.pillarCards || []).map((card, index) => ({
+    id: index + 1,
+    title: card.title || ["Engineering", "Interaction", "Performance"][index],
+    label: card.subLabel || ["Architect", "Cinematic", "Optimized"][index],
+    icon: card.iconName || ["Code2", "Layers", "Compass"][index],
+    desc:
+      card.description ||
+      [
+        "Building robust, type-safe full-stack applications with Next.js and Cloud infrastructure.",
+        "Crafting fluid user experiences with GSAP and Framer Motion.",
+        "Optimization is a philosophy. I target 100/100 Lighthouse scores.",
+      ][index],
+  }));
+
+  // Fallback for empty pillars
+  if (pillars.length === 0) {
+    pillars.push(
+      {
+        id: 1,
+        title: "Engineering",
+        label: "Architect",
+        icon: "Code2",
+        desc: "Building robust, type-safe full-stack applications with Next.js and Cloud infrastructure. Speed and reliability are my baseline.",
+      },
+      {
+        id: 2,
+        title: "Interaction",
+        label: "Cinematic",
+        icon: "Layers",
+        desc: "Crafting fluid user experiences with GSAP and Framer Motion. I use movement to guide narratives and evoke emotions.",
+      },
+      {
+        id: 3,
+        title: "Performance",
+        label: "Optimized",
+        icon: "Compass",
+        desc: "Optimization is a philosophy. I target 100/100 Lighthouse scores by focusing on critical paths and asset efficiency.",
+      }
+    );
+  }
 
   useEffect(() => {
     const updateTime = () => {
@@ -77,15 +124,16 @@ export default function About() {
       <div className="absolute top-0 -left-1/4 w-[40vw] h-[40vw] bg-primary/5 rounded-full blur-[150px] pointer-events-none translate-x-1/4 -translate-y-1/4" />
 
       <div className="relative z-10 space-y-24">
-        {/* CLEAN HEADER */}
         <div className="about-header border-b border-white/5 pb-12 flex flex-col md:flex-row justify-between items-end gap-8">
           <h2 className="text-7xl md:text-8xl font-black uppercase tracking-tighter leading-none">
-            About <br />
-            <span className="bg-white text-black">Me.</span>
+            {data.heading?.[0] || "About"} <br />
+            <span className="bg-white text-black">
+              {data.heading?.[1] || "Me."}
+            </span>
           </h2>
           <div className="flex items-center gap-4 text-green-600 font-mono text-xs tracking-widest bg-green-500/5 border border-green-500/10 px-6 py-3 rounded-full uppercase">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            Currently Available
+            {data.availabilityStatus || "Currently Available"}
           </div>
         </div>
 
@@ -93,10 +141,14 @@ export default function About() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
           <div className="about-intro lg:col-span-8">
             <p className="text-3xl md:text-4xl font-light text-gray-400 leading-tight">
-              I am a{" "}
-              <span className="text-white italic">Creative Developer</span>{" "}
-              dedicated to building stable, high-performance digital products
-              that don&apos;t just function, but inspire.
+              {data.mainIntroText || (
+                <>
+                  I am a{" "}
+                  <span className="text-white italic">Creative Developer</span>{" "}
+                  dedicated to building stable, high-performance digital
+                  products that don&apos;t just function, but inspire.
+                </>
+              )}
             </p>
           </div>
           <div className="about-intro lg:col-span-4 flex flex-col gap-8">
@@ -105,15 +157,20 @@ export default function About() {
                 <span>Location Node</span>
                 <span>{time}</span>
               </div>
-              <h4 className="text-xl font-bold">Dhaka, Bangladesh</h4>
+              <h4 className="text-xl font-bold">
+                {data.locationNode || "Dhaka, Bangladesh"}
+              </h4>
               <p className="text-sm text-gray-500 leading-relaxed font-light">
-                Operating at the intersection of technology and design to
-                deliver
-                <span className="text-primary/60">
-                  {" "}
-                  world-class solutions
-                </span>{" "}
-                for a global audience.
+                {data.locationDescription || (
+                  <>
+                    Operating at the intersection of technology and design to
+                    deliver{" "}
+                    <span className="text-primary/60">
+                      world-class solutions
+                    </span>{" "}
+                    for a global audience.
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -121,62 +178,27 @@ export default function About() {
 
         {/* 3-COLUMN PILLAR GRID */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-px md:bg-white/5 md:border md:border-white/5 overflow-hidden rounded-3xl">
-          {/* Card 1: Engineering */}
-          <div className="about-card md:bg-dark-background p-10 flex flex-col justify-between min-h-[380px] hover:bg-white/2 transition-colors group">
-            <div className="space-y-6">
-              <div className="w-14 h-14 rounded-2xl bg-white/3 border border-white/10 flex items-center justify-center text-white group-hover:border-primary/50 transition-colors">
-                <Code2 size={28} strokeWidth={1.5} />
+          {pillars.map((pillar) => (
+            <div
+              key={pillar.id}
+              className="about-card md:bg-dark-background p-10 flex flex-col justify-between min-h-[380px] hover:bg-white/2 transition-colors group"
+            >
+              <div className="space-y-6">
+                <div className="w-14 h-14 rounded-2xl bg-white/3 border border-white/10 flex items-center justify-center text-white group-hover:border-primary/50 transition-colors">
+                  {getIcon(pillar.icon)}
+                </div>
+                <div className="space-y-2">
+                  <span className="font-mono text-[10px] text-primary uppercase tracking-widest">
+                    {pillar.label}
+                  </span>
+                  <h3 className="text-2xl font-bold">{pillar.title}</h3>
+                </div>
               </div>
-              <div className="space-y-2">
-                <span className="font-mono text-[10px] text-primary uppercase tracking-widest">
-                  Architect
-                </span>
-                <h3 className="text-2xl font-bold">Engineering</h3>
-              </div>
+              <p className="text-gray-500 text-sm leading-relaxed group-hover:text-gray-300 transition-colors">
+                {pillar.desc}
+              </p>
             </div>
-            <p className="text-gray-500 text-sm leading-relaxed group-hover:text-gray-300 transition-colors">
-              Building robust, type-safe full-stack applications with Next.js
-              and Cloud infrastructure. Speed and reliability are my baseline.
-            </p>
-          </div>
-
-          {/* Card 2: Motion */}
-          <div className="about-card md:bg-dark-background p-10 flex flex-col justify-between min-h-[380px] hover:bg-white/2 transition-colors group">
-            <div className="space-y-6">
-              <div className="w-14 h-14 rounded-2xl bg-white/3 border border-white/10 flex items-center justify-center text-white group-hover:border-primary/50 transition-colors">
-                <Layers size={28} strokeWidth={1.5} />
-              </div>
-              <div className="space-y-2">
-                <span className="font-mono text-[10px] text-primary uppercase tracking-widest">
-                  Cinematic
-                </span>
-                <h3 className="text-2xl font-bold">Interaction</h3>
-              </div>
-            </div>
-            <p className="text-gray-500 text-sm leading-relaxed group-hover:text-gray-300 transition-colors">
-              Crafting fluid user experiences with GSAP and Framer Motion. I use
-              movement to guide narratives and evoke emotions.
-            </p>
-          </div>
-
-          {/* Card 3: Performance */}
-          <div className="about-card md:bg-dark-background p-10 flex flex-col justify-between min-h-[380px] hover:bg-white/2 transition-colors group">
-            <div className="space-y-6">
-              <div className="w-14 h-14 rounded-2xl bg-white/3 border border-white/10 flex items-center justify-center text-white group-hover:border-primary/50 transition-colors">
-                <Compass size={28} strokeWidth={1.5} />
-              </div>
-              <div className="space-y-2">
-                <span className="font-mono text-[10px] text-primary uppercase tracking-widest">
-                  Optimized
-                </span>
-                <h3 className="text-2xl font-bold">Performance</h3>
-              </div>
-            </div>
-            <p className="text-gray-500 text-sm leading-relaxed group-hover:text-gray-300 transition-colors">
-              Optimization is a philosophy. I target 100/100 Lighthouse scores
-              by focusing on critical paths and asset efficiency.
-            </p>
-          </div>
+          ))}
         </div>
 
         {/* BOTTOM ACTION */}
@@ -184,11 +206,11 @@ export default function About() {
           <div className="flex gap-16 font-mono text-[10px] text-white/20 tracking-widest">
             <div className="space-y-1">
               <span className="block text-white/40">TECH_STACK</span>
-              <span>NEXT.JS // TS // GSAP</span>
+              <span>{data.techStack || "NEXT.JS // TS // GSAP"}</span>
             </div>
             <div className="space-y-1">
               <span className="block text-white/40">VERSION</span>
-              <span>FINAL_V1.0</span>
+              <span>{data.version || "FINAL_V1.0"}</span>
             </div>
           </div>
 

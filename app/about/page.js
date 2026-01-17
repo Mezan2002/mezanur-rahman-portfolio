@@ -1,17 +1,247 @@
 "use client";
 
+import { getSiteSettings } from "@/lib/api";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowUpRight, Code, Cpu, Layers } from "lucide-react";
+import { ArrowUpRight, Circle, Loader2, Trophy } from "lucide-react";
 import Image from "next/image";
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const SKILL_ICONS = {
+  React: (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-12 h-12"
+    >
+      <circle cx="12" cy="12" r="2" fill="currentColor" />
+      <g stroke="currentColor" strokeWidth="1.5">
+        <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(0 12 12)" />
+        <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)" />
+        <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)" />
+      </g>
+    </svg>
+  ),
+  NextJS: (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-12 h-12"
+    >
+      <path
+        d="M12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24Z"
+        fill="currentColor"
+        fillOpacity="0.1"
+      />
+      <path
+        d="M19.5 19.5L9.75 6H7.5V18H9V8.8125L17.8125 20.4375C18.4125 20.175 18.975 19.875 19.5 19.5ZM16.5 6V16.5H15V6H16.5Z"
+        fill="currentColor"
+      />
+    </svg>
+  ),
+  TypeScript: (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-12 h-12"
+    >
+      <rect
+        x="2"
+        y="2"
+        width="20"
+        height="20"
+        rx="4"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M7 10h4v7M15 14h3M15 10h3"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M16.5 17v-3.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  ),
+  Tailwind: (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-12 h-12"
+    >
+      <path
+        d="M7.5 15C5.5 15.5 4 14.5 3 13C4 16 6 18 8 18C11 18 12 16 13 14C14 12 15 11 17 11.5C19 12 20.5 13 21.5 14.5C20.5 11.5 18.5 9.5 16.5 9.5C13.5 9.5 12.5 11.5 11.5 13.5C10.5 15.5 9.5 16.5 7.5 15Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M13.5 8C11.5 8.5 10 7.5 9 6C10 9 12 11 14 11C17 11 18 9 19 7C20 5 21 4 23 4.5C22 1.5 20 -0.5 18 -0.5C15 -0.5 14 1.5 13 3.5C12 5.5 11 6.5 9 6"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.5"
+      />
+    </svg>
+  ),
+  GSAP: (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-12 h-12"
+    >
+      <path
+        d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M8.5 10.5C9.5 9 12 8 14 9.5C16 11 16 14 13.5 15.5C11 17 8 16 7 14.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  ),
+  NodeJS: (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-12 h-12"
+    >
+      <path
+        d="M12 2L3 7V17L12 22L21 17V7L12 2Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 22V12"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 12L3 7"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 12L21 7"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  ),
+  Figma: (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-12 h-12"
+    >
+      <path
+        d="M12 12H16C18.2091 12 20 10.2091 20 8C20 5.79086 18.2091 4 16 4H12V12Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M12 12H8C5.79086 12 4 10.2091 4 8C4 5.79086 5.79086 4 8 4H12V12Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M12 12V16C12 18.2091 10.2091 20 8 20C5.79086 20 4 18.2091 4 16C4 13.7909 5.79086 12 8 12H12Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <circle cx="12" cy="12" r="2" fill="currentColor" />
+    </svg>
+  ),
+  MongoDB: (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-12 h-12"
+    >
+      <path
+        d="M12 2C12 2 4.5 7 4.5 14C4.5 19 8 22 12 22C16 22 19.5 19 19.5 14C19.5 7 12 2 12 2Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 2V22"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 14C13 13 15 13 15 15"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        opacity="0.5"
+      />
+    </svg>
+  ),
+};
+
 export default function AboutPage() {
   const containerRef = useRef(null);
+  const [aboutData, setAboutData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
+  // Fetch Data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getSiteSettings();
+        console.log("ABOUT PAGE: Raw API Response:", response);
+
+        if (response.success && response.data?.aboutPage) {
+          console.log("ABOUT PAGE: aboutData set to:", response.data.aboutPage);
+          setAboutData(response.data.aboutPage);
+        } else {
+          console.warn("ABOUT PAGE: No aboutPage data found in response");
+        }
+      } catch (error) {
+        console.error("Failed to fetch about page data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Animations
   useLayoutEffect(() => {
+    if (loading || !aboutData) return;
+
     const ctx = gsap.context(() => {
       // Parallax Image
       gsap.to(".cover-image", {
@@ -38,10 +268,60 @@ export default function AboutPage() {
           },
         });
       });
+
+      // Skill Cards
+      gsap.from(".skill-card", {
+        y: 60,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.1,
+        scrollTrigger: {
+          trigger: ".skills-grid",
+          start: "top 80%",
+        },
+      });
+
+      // Rewards
+      gsap.from(".reward-item", {
+        x: -50,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.1,
+        scrollTrigger: {
+          trigger: ".rewards-list",
+          start: "top 80%",
+        },
+      });
+
+      // Experience
+      gsap.from(".experience-item", {
+        y: 30,
+        opacity: 0,
+        stagger: 0.1,
+        scrollTrigger: {
+          trigger: ".experience-list",
+          start: "top 80%",
+        },
+      });
     }, containerRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [loading, aboutData]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-dark-background flex items-center justify-center">
+        <Loader2 className="animate-spin text-white w-10 h-10" />
+      </div>
+    );
+  }
+
+  // Fallback defaults if data missing partially
+  const hero = aboutData?.hero || {};
+  const intro = aboutData?.introduction || {};
+  const skills = aboutData?.skills || {};
+  const recognition = aboutData?.recognition || {};
+  const experience = aboutData?.experience || {};
 
   return (
     <main ref={containerRef} className="bg-dark-background min-h-screen">
@@ -49,173 +329,191 @@ export default function AboutPage() {
       <section className="cover-container relative h-[70vh] md:h-[85vh] overflow-hidden w-full">
         <div className="absolute inset-0 cover-image scale-110">
           <Image
-            src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=2000"
+            src={
+              hero.coverImage ||
+              "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80&w=2000"
+            }
             alt="Workspace"
             fill
             className="object-cover brightness-[0.4]"
             priority
           />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-dark-background to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-dark-background via-dark-background/20 to-transparent"></div>
 
         <div className="absolute bottom-0 left-0 w-full p-6 md:p-12 z-10 flex flex-col md:flex-row justify-between items-end">
           <div>
             <h1 className="text-[12vw] md:text-[10vw] font-black font-syne text-white uppercase leading-[0.85] tracking-tighter">
-              Mezanur
+              {hero.firstName || "Mezanur"}
             </h1>
             <h1 className="text-[12vw] md:text-[10vw] font-black font-syne bg-white text-black uppercase leading-[0.85] tracking-tighter ml-12 md:ml-24">
-              Rahman
+              {hero.lastName || "Rahman"}
             </h1>
           </div>
-          <div className="flex gap-4 mb-4 md:mb-8 text-white">
-            <span className="px-4 py-1 border border-white/20 rounded-full text-xs uppercase tracking-widest bg-white/5 backdrop-blur-sm">
-              Dev
-            </span>
-            <span className="px-4 py-1 border border-white/20 rounded-full text-xs uppercase tracking-widest bg-white/5 backdrop-blur-sm">
-              Design
-            </span>
-            <span className="px-4 py-1 border border-white/20 rounded-full text-xs uppercase tracking-widest bg-white/5 backdrop-blur-sm">
-              Art
-            </span>
+          <div className="flex flex-col items-end gap-6 mb-4 md:mb-8">
+            <div className="flex gap-4 text-white">
+              {(hero.roleTags || ["Dev", "Design", "Art"]).map((tag, i) => (
+                <span
+                  key={i}
+                  className="px-4 py-1 border border-white/20 rounded-full text-xs uppercase tracking-widest bg-white/5 backdrop-blur-sm"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* 2. BIG INTRO */}
       <section className="py-24 px-6 md:px-12 max-w-[1200px] mx-auto text-center md:text-left">
-        <p className="reveal-text text-2xl md:text-5xl font-light text-white leading-relaxed mb-12">
-          <span className="text-primary font-serif italic">Crafting</span>{" "}
-          digital experiences that exist at the intersection of Art and
-          Engineering. I build products that are not just functional, but{" "}
-          <span className="font-serif italic text-gray-400">memorable</span>.
+        <p className="reveal-text text-2xl md:text-5xl font-light text-white leading-relaxed mb-16 whitespace-pre-wrap">
+          {intro.introductionText || "Crafting digital experiences..."}
         </p>
-        <div className="reveal-text grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-white/10 pt-12">
-          <div>
-            <h3 className="text-4xl font-bold text-white mb-2">04+</h3>
-            <p className="text-xs uppercase tracking-widest text-gray-500">
-              Years Active
-            </p>
-          </div>
-          <div>
-            <h3 className="text-4xl font-bold text-white mb-2">25+</h3>
-            <p className="text-xs uppercase tracking-widest text-gray-500">
-              Projects
-            </p>
-          </div>
-          <div>
-            <h3 className="text-4xl font-bold text-white mb-2">15+</h3>
-            <p className="text-xs uppercase tracking-widest text-gray-500">
-              Happy Clients
-            </p>
-          </div>
-          <div>
-            <h3 className="text-4xl font-bold text-white mb-2">100%</h3>
-            <p className="text-xs uppercase tracking-widest text-gray-500">
-              Commitment
-            </p>
-          </div>
-        </div>
-      </section>
 
-      {/* 3. CAPABILITIES GRID */}
-      <section className="py-24 px-6 md:px-12 bg-white/[0.02]">
-        <div className="max-w-[1400px] mx-auto">
-          <div className="mb-16 flex justify-between items-end">
-            <h2 className="reveal-text text-6xl md:text-7xl font-black font-syne text-white uppercase tracking-tighter">
-              Capabilities
-            </h2>
-            <span className="hidden md:block text-sm font-mono text-gray-500 uppercase">
-              What I do best
+        <div className="reveal-text border-t border-white/10 pt-12 flex flex-wrap justify-between gap-12">
+          <div className="text-left">
+            <span className="block text-4xl md:text-6xl font-bold text-white mb-2">
+              {intro.yearsExperience || "04+"}
+            </span>
+            <span className="text-xs uppercase tracking-[0.2em] text-gray-500">
+              Years Exp
             </span>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/10 border border-white/10">
-            {/* Card 1 */}
-            <div className="bg-dark-background p-12 min-h-[300px] group hover:bg-white/[0.02] transition-colors">
-              <Cpu className="w-10 h-10 text-white mb-8" strokeWidth={1.5} />
-              <h3 className="text-2xl font-bold text-white mb-4">
-                Development
-              </h3>
-              <p className="text-gray-400 leading-relaxed mb-8">
-                Scalable, rigid, and type-safe applications using the modern
-                React stack.
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <span className="text-xs text-primary bg-primary/10 px-2 py-1 ">
-                  Next.js
-                </span>
-                <span className="text-xs text-primary bg-primary/10 px-2 py-1 ">
-                  TypeScript
-                </span>
-              </div>
-            </div>
-
-            {/* Card 2 */}
-            <div className="bg-dark-background p-12 min-h-[300px] group hover:bg-white/[0.02] transition-colors">
-              <Layers className="w-10 h-10 text-white mb-8" strokeWidth={1.5} />
-              <h3 className="text-2xl font-bold text-white mb-4">Design</h3>
-              <p className="text-gray-400 leading-relaxed mb-8">
-                UI/UX design that focuses on usability, accessibility, and
-                visual impact.
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <span className="text-xs text-primary bg-primary/10 px-2 py-1 ">
-                  Figma
-                </span>
-                <span className="text-xs text-primary bg-primary/10 px-2 py-1 ">
-                  Systems
-                </span>
-              </div>
-            </div>
-
-            {/* Card 3 */}
-            <div className="bg-dark-background p-12 min-h-[300px] group hover:bg-white/[0.02] transition-colors">
-              <Code className="w-10 h-10 text-white mb-8" strokeWidth={1.5} />
-              <h3 className="text-2xl font-bold text-white mb-4">Animation</h3>
-              <p className="text-gray-400 leading-relaxed mb-8">
-                Bringing interfaces to life with smooth, physics-based
-                micro-interactions.
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <span className="text-xs text-primary bg-primary/10 px-2 py-1 ">
-                  GSAP
-                </span>
-                <span className="text-xs text-primary bg-primary/10 px-2 py-1 ">
-                  Motion
-                </span>
-              </div>
-            </div>
+          <div className="text-left">
+            <span className="block text-4xl md:text-6xl font-bold text-white mb-2">
+              {intro.projectsCount || "25+"}
+            </span>
+            <span className="text-xs uppercase tracking-[0.2em] text-gray-500">
+              Projects
+            </span>
+          </div>
+          <div className="text-left">
+            <span className="block text-4xl md:text-6xl font-bold text-white mb-2">
+              {intro.clientsCount || "15+"}
+            </span>
+            <span className="text-xs uppercase tracking-[0.2em] text-gray-500">
+              Clients
+            </span>
+          </div>
+          <div className="text-left">
+            <span className="block text-4xl md:text-6xl font-bold text-white mb-2">
+              {intro.dedication || "100%"}
+            </span>
+            <span className="text-xs uppercase tracking-[0.2em] text-gray-500">
+              Dedication
+            </span>
           </div>
         </div>
       </section>
 
-      {/* 4. EXPERIENCE LIST */}
+      {/* 3. PREMIUM SKILLS GRID */}
+      <section className="py-24 px-6 md:px-12 bg-white/[0.02]">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="mb-20 flex flex-col md:flex-row justify-between items-end gap-6">
+            <div>
+              <h2 className="reveal-text text-5xl md:text-7xl font-black font-syne text-white uppercase tracking-tighter mb-4">
+                {skills.title || "Tech Stack"}
+              </h2>
+              <p className="reveal-text text-gray-400 max-w-md">
+                {skills.description ||
+                  "A curated arsenal of modern tools and technologies tailored for scalable, high-performance applications."}
+              </p>
+            </div>
+            <div className="hidden md:flex items-center gap-2 text-sm font-mono text-gray-500 uppercase">
+              <Circle className="w-3 h-3 text-primary fill-primary animate-pulse" />
+              Always Learning
+            </div>
+          </div>
+
+          <div className="skills-grid grid grid-cols-2 md:grid-cols-4 gap-4">
+            {(skills.skillItems || Object.keys(SKILL_ICONS)).map((name) => {
+              // Find icon helper - matching case insensitive or exact
+              const iconKey =
+                Object.keys(SKILL_ICONS).find(
+                  (k) => k.toLowerCase() === name.toLowerCase()
+                ) || name;
+              const icon = SKILL_ICONS[iconKey] || SKILL_ICONS["React"]; // Fallback icon
+
+              return (
+                <div
+                  key={name}
+                  className="skill-card group relative bg-white/[0.03] border border-white/5 p-8 md:p-12 flex flex-col items-center justify-center gap-6 hover:bg-white/[0.06] transition-all duration-500 hover:-translate-y-2 overflow-hidden"
+                >
+                  {/* Background Glow */}
+                  <div className="absolute inset-0 bg-linear-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl" />
+
+                  <div className="text-gray-400 group-hover:text-white transition-colors duration-300 transform group-hover:scale-110">
+                    {icon}
+                  </div>
+                  <span className="text-sm font-bold uppercase tracking-widest text-gray-500 group-hover:text-white transition-colors">
+                    {name}
+                  </span>
+
+                  <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <ArrowUpRight className="w-4 h-4 text-white" />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* 4. REWARDS & RECOGNITION */}
+      <section className="py-24 px-6 md:px-12 relative overflow-hidden">
+        {/* Background Accents */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className="max-w-[1200px] mx-auto relative z-10">
+          <div className="mb-16 text-center md:text-left">
+            <h2 className="reveal-text text-4xl md:text-6xl font-bold font-syne text-white uppercase tracking-tight">
+              {recognition.title || "Recognition"}
+            </h2>
+          </div>
+
+          <div className="rewards-list flex flex-col border-t border-white/10">
+            {(recognition.awards || []).map((item, i) => (
+              <div
+                key={i}
+                className="reward-item group flex flex-col md:flex-row justify-between items-center py-10 border-b border-white/10 hover:bg-white/2 transition-colors cursor-default px-4"
+              >
+                <div className="flex items-center gap-6 w-full md:w-1/3">
+                  <Trophy className="w-6 h-6 text-gray-600 group-hover:text-primary transition-colors" />
+                  <span className="text-xl font-bold text-white">
+                    {item.title}
+                  </span>
+                </div>
+                <div className="w-full md:w-1/3 text-center md:text-left py-2 md:py-0">
+                  <span className="text-gray-400 font-mono">
+                    {item.organization}
+                  </span>
+                </div>
+                <div className="w-full md:w-1/3 flex justify-between items-center">
+                  <span className="text-gray-500 group-hover:text-white transition-colors">
+                    {item.projectName}
+                  </span>
+                  <span className="text-xs border border-white/10 px-2 py-1 rounded-full text-gray-600 group-hover:border-white/30 group-hover:text-white transition-all">
+                    {item.year}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 5. EXPERIENCE LIST */}
       <section className="py-24 px-6 md:px-12 max-w-[1000px] mx-auto">
         <h2 className="reveal-text text-4xl md:text-5xl font-bold font-syne text-white uppercase mb-16 text-center">
-          Selected Roles
+          {experience.title || "Career"}
         </h2>
 
-        <div className="flex flex-col">
-          {[
-            {
-              role: "Senior Frontend Engineer",
-              company: "TechCorps",
-              year: "2023 - Present",
-            },
-            {
-              role: "Creative Developer",
-              company: "Studio Abstract",
-              year: "2021 - 2023",
-            },
-            {
-              role: "Frontend Developer",
-              company: "Freelance",
-              year: "2019 - 2021",
-            },
-          ].map((job, i) => (
+        <div className="experience-list flex flex-col">
+          {(experience.jobs || []).map((job, i) => (
             <div
               key={i}
-              className="group flex flex-col md:flex-row justify-between items-center py-10 border-b border-white/10 hover:border-white transition-colors cursor-pointer"
+              className="experience-item group flex flex-col md:flex-row justify-between items-center py-10 border-b border-white/10 hover:border-white transition-colors cursor-pointer"
             >
               <div className="text-center md:text-left mb-4 md:mb-0">
                 <h4 className="text-2xl md:text-3xl font-bold text-white group-hover:pl-4 transition-all duration-300">
@@ -227,7 +525,7 @@ export default function AboutPage() {
               </div>
               <div className="flex items-center gap-8">
                 <span className="font-mono text-sm text-gray-500">
-                  {job.year}
+                  {job.duration}
                 </span>
                 <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center -rotate-45 group-hover:rotate-0 transition-transform duration-300">
                   <ArrowUpRight className="text-white w-5 h-5" />

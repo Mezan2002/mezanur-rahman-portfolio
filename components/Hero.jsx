@@ -2,11 +2,23 @@
 
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { PenTool } from "lucide-react";
+import * as Icons from "lucide-react";
 import { useRef } from "react";
 
-export default function Hero() {
+export default function Hero({ data = {} }) {
   const containerRef = useRef(null);
+
+  const getIcon = (iconName) => {
+    const Icon = Icons[iconName] || Icons.PenTool;
+    return (
+      <Icon
+        strokeWidth={0.8}
+        className="size-12 md:size-20 opacity-40 transform -rotate-12 group-hover:rotate-0 transition-transform duration-700"
+      />
+    );
+  };
+
+  const headingLines = data?.heading || ["Creative", "Developer", "& Designer"];
 
   useGSAP(
     () => {
@@ -59,7 +71,7 @@ export default function Hero() {
           window.removeEventListener("page-transition-complete", runAnimation);
       }
     },
-    { scope: containerRef }
+    { scope: containerRef, dependencies: [data] }
   );
 
   return (
@@ -68,7 +80,6 @@ export default function Hero() {
       className="h-screen w-full flex flex-col justify-center items-center px-4 md:px-12 bg-dark-background relative overflow-hidden"
     >
       {/* Background gradients */}
-      {/* Top Right Highlight - Near Menu */}
       <div className="absolute top-0 right-0 w-[50vw] h-[50vh] bg-primary/10 rounded-full blur-[120px] pointer-events-none translate-x-1/4 -translate-y-1/4"></div>
 
       <div className="relative z-10 w-full max-w-[1600px] mx-auto flex-1 flex flex-col justify-center items-center">
@@ -77,14 +88,14 @@ export default function Hero() {
           {/* Line 1 */}
           <div className="overflow-hidden">
             <h1 className="hero-text text-[15vw] md:text-[12vw] font-black font-syne text-white uppercase tracking-tighter mix-blend-difference">
-              Creative
+              {headingLines[0]}
             </h1>
           </div>
 
           {/* Line 2 - Solid Background */}
           <div className="overflow-hidden">
             <h1 className="hero-text inline-block text-[15vw] md:text-[12vw] font-black font-syne text-black bg-white px-4 md:px-8 py-0 md:py-2 uppercase tracking-tighter transform shadow-2xl shadow-white/10 hover:shadow-white/20 transition-shadow duration-500 cursor-default">
-              Developer
+              {headingLines[1]}
             </h1>
           </div>
 
@@ -94,14 +105,11 @@ export default function Hero() {
               className="hero-text inline-block text-[15vw] md:text-[12vw] font-black font-syne text-transparent uppercase tracking-tighter hover:text-white/10 transition-colors duration-500 cursor-default"
               style={{ WebkitTextStroke: "2px rgba(255, 255, 255, 0.3)" }}
             >
-              & Designer
+              {headingLines[2]}
             </h1>
             {/* Decal Icon */}
-            <div className="hero-icon absolute -bottom-4 md:-bottom-8 right-0 md:-right-24 pointer-events-none text-white mix-blend-difference group">
-              <PenTool
-                strokeWidth={0.8}
-                className="size-12 md:size-20 opacity-40 transform -rotate-12 group-hover:rotate-0 transition-transform duration-700"
-              />
+            <div className="hero-icon absolute -bottom-4 md:-bottom-8 right-0 md:-right-24 pointer-events-none text-white mix-blend-difference group flex items-center justify-center">
+              {getIcon(data?.decalIcon)}
             </div>
           </div>
         </div>

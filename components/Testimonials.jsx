@@ -12,7 +12,7 @@ import { useEffect, useRef, useState } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function Testimonials() {
+export default function Testimonials({ data = {} }) {
   const sectionRef = useRef(null);
   const sliderRef = useRef(null);
   const [testimonials, setTestimonials] = useState([]);
@@ -34,6 +34,8 @@ export default function Testimonials() {
     };
     fetchTestimonials();
   }, []);
+
+  const titleLines = data?.title?.split(" ") || ["Global", "Testimonials"];
 
   const nextSlide = () => {
     if (testimonials.length === 0) return;
@@ -129,12 +131,14 @@ export default function Testimonials() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 mb-24">
           <div className="flex-1">
             <p className="text-gray-500 uppercase tracking-widest text-sm mb-4 font-mono">
-              ( Client Success Stories )
+              {data?.tag || "( Client Success Stories )"}
             </p>
             <h2 className="text-5xl md:text-7xl lg:text-8xl font-black font-syne text-white uppercase leading-[0.85]">
-              Global
+              {titleLines[0]}
               <br />
-              <span className="bg-white text-black">Testimonials</span>
+              <span className="bg-white text-black">
+                {titleLines.slice(1).join(" ") || "Testimonials"}
+              </span>
             </h2>
           </div>
 
