@@ -1,312 +1,52 @@
 "use client";
 
-import { getSiteSettings } from "@/lib/api";
+import { getSiteSettings, getSkills } from "@/lib/api";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowUpRight, Circle, Loader2, Trophy } from "lucide-react";
+import { ArrowUpRight, Circle, Code2, Loader2, Trophy } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
-
-const SKILL_ICONS = {
-  React: (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-12 h-12"
-    >
-      <circle cx="12" cy="12" r="2" fill="currentColor" />
-      <g stroke="currentColor" strokeWidth="1.5">
-        <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(0 12 12)" />
-        <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)" />
-        <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)" />
-      </g>
-    </svg>
-  ),
-  NextJS: (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-12 h-12"
-    >
-      <path
-        d="M12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24Z"
-        fill="currentColor"
-        fillOpacity="0.1"
-      />
-      <path
-        d="M19.5 19.5L9.75 6H7.5V18H9V8.8125L17.8125 20.4375C18.4125 20.175 18.975 19.875 19.5 19.5ZM16.5 6V16.5H15V6H16.5Z"
-        fill="currentColor"
-      />
-    </svg>
-  ),
-  TypeScript: (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-12 h-12"
-    >
-      <rect
-        x="2"
-        y="2"
-        width="20"
-        height="20"
-        rx="4"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M7 10h4v7M15 14h3M15 10h3"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="M16.5 17v-3.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  ),
-  Tailwind: (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-12 h-12"
-    >
-      <path
-        d="M7.5 15C5.5 15.5 4 14.5 3 13C4 16 6 18 8 18C11 18 12 16 13 14C14 12 15 11 17 11.5C19 12 20.5 13 21.5 14.5C20.5 11.5 18.5 9.5 16.5 9.5C13.5 9.5 12.5 11.5 11.5 13.5C10.5 15.5 9.5 16.5 7.5 15Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M13.5 8C11.5 8.5 10 7.5 9 6C10 9 12 11 14 11C17 11 18 9 19 7C20 5 21 4 23 4.5C22 1.5 20 -0.5 18 -0.5C15 -0.5 14 1.5 13 3.5C12 5.5 11 6.5 9 6"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        opacity="0.5"
-      />
-    </svg>
-  ),
-  GSAP: (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-12 h-12"
-    >
-      <path
-        d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M8.5 10.5C9.5 9 12 8 14 9.5C16 11 16 14 13.5 15.5C11 17 8 16 7 14.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  ),
-  NodeJS: (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-12 h-12"
-    >
-      <path
-        d="M12 2L3 7V17L12 22L21 17V7L12 2Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M12 22V12"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M12 12L3 7"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M12 12L21 7"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  ),
-  Figma: (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-12 h-12"
-    >
-      <path
-        d="M12 12H16C18.2091 12 20 10.2091 20 8C20 5.79086 18.2091 4 16 4H12V12Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M12 12H8C5.79086 12 4 10.2091 4 8C4 5.79086 5.79086 4 8 4H12V12Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M12 12V16C12 18.2091 10.2091 20 8 20C5.79086 20 4 18.2091 4 16C4 13.7909 5.79086 12 8 12H12Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <circle cx="12" cy="12" r="2" fill="currentColor" />
-    </svg>
-  ),
-  MongoDB: (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-12 h-12"
-    >
-      <path
-        d="M12 2C12 2 4.5 7 4.5 14C4.5 19 8 22 12 22C16 22 19.5 19 19.5 14C19.5 7 12 2 12 2Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M12 2V22"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M12 14C13 13 15 13 15 15"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        opacity="0.5"
-      />
-    </svg>
-  ),
-};
 
 export default function AboutPage() {
   const containerRef = useRef(null);
   const [aboutData, setAboutData] = useState(null);
+  const [skillsData, setSkillsData] = useState([]);
+  console.log("🚀 ~ AboutPage ~ skillsData:", skillsData);
   const [loading, setLoading] = useState(true);
 
   // Fetch Data
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await getSiteSettings();
-        console.log("ABOUT PAGE: Raw API Response:", response);
+        const [settingsRes, skillsRes] = await Promise.all([
+          getSiteSettings(),
+          getSkills(),
+        ]);
 
-        if (response.success && response.data?.aboutPage) {
-          console.log("ABOUT PAGE: aboutData set to:", response.data.aboutPage);
-          setAboutData(response.data.aboutPage);
+        console.log("DEBUG: Site Settings Response:", settingsRes);
+        console.log("DEBUG: Skills API Response:", skillsRes);
+
+        if (settingsRes.success && settingsRes.data?.aboutPage) {
+          console.log("DEBUG: Setting aboutData:", settingsRes.data.aboutPage);
+          setAboutData(settingsRes.data.aboutPage);
         } else {
-          console.warn("ABOUT PAGE: No aboutPage data found in response");
+          console.warn("DEBUG: No aboutPage data found");
+        }
+
+        if (skillsRes.success && skillsRes.data) {
+          console.log("DEBUG: Setting skillsData:", skillsRes.data);
+          setSkillsData(skillsRes.data);
         }
       } catch (error) {
-        console.error("Failed to fetch about page data:", error);
+        console.error("DEBUG: Failed to fetch data:", error);
       } finally {
         setLoading(false);
       }
     };
     fetchData();
   }, []);
-
-  // Animations
-  useLayoutEffect(() => {
-    if (loading || !aboutData) return;
-
-    const ctx = gsap.context(() => {
-      // Parallax Image
-      gsap.to(".cover-image", {
-        yPercent: 30,
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".cover-container",
-          start: "top top",
-          end: "bottom top",
-          scrub: true,
-        },
-      });
-
-      // Text Reveals
-      const headings = gsap.utils.toArray(".reveal-text");
-      headings.forEach((h) => {
-        gsap.from(h, {
-          y: 50,
-          opacity: 0,
-          duration: 1,
-          scrollTrigger: {
-            trigger: h,
-            start: "top 85%",
-          },
-        });
-      });
-
-      // Skill Cards
-      gsap.from(".skill-card", {
-        y: 60,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.1,
-        scrollTrigger: {
-          trigger: ".skills-grid",
-          start: "top 80%",
-        },
-      });
-
-      // Rewards
-      gsap.from(".reward-item", {
-        x: -50,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.1,
-        scrollTrigger: {
-          trigger: ".rewards-list",
-          start: "top 80%",
-        },
-      });
-
-      // Experience
-      gsap.from(".experience-item", {
-        y: 30,
-        opacity: 0,
-        stagger: 0.1,
-        scrollTrigger: {
-          trigger: ".experience-list",
-          start: "top 80%",
-        },
-      });
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, [loading, aboutData]);
 
   if (loading) {
     return (
@@ -339,7 +79,7 @@ export default function AboutPage() {
             priority
           />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-dark-background via-dark-background/20 to-transparent"></div>
+        <div className="absolute inset-0 bg-linear-to-t from-dark-background via-dark-background/20 to-transparent"></div>
 
         <div className="absolute bottom-0 left-0 w-full p-6 md:p-12 z-10 flex flex-col md:flex-row justify-between items-end">
           <div>
@@ -408,7 +148,7 @@ export default function AboutPage() {
       </section>
 
       {/* 3. PREMIUM SKILLS GRID */}
-      <section className="py-24 px-6 md:px-12 bg-white/[0.02]">
+      <section className="py-24 px-6 md:px-12 bg-white/2">
         <div className="max-w-[1400px] mx-auto">
           <div className="mb-20 flex flex-col md:flex-row justify-between items-end gap-6">
             <div>
@@ -421,41 +161,52 @@ export default function AboutPage() {
               </p>
             </div>
             <div className="hidden md:flex items-center gap-2 text-sm font-mono text-gray-500 uppercase">
-              <Circle className="w-3 h-3 text-primary fill-primary animate-pulse" />
+              <Circle className="w-3 h-3 text-green-500 fill-green-500 animate-pulse" />
               Always Learning
             </div>
           </div>
 
           <div className="skills-grid grid grid-cols-2 md:grid-cols-4 gap-4">
-            {(skills.skillItems || Object.keys(SKILL_ICONS)).map((name) => {
-              // Find icon helper - matching case insensitive or exact
-              const iconKey =
-                Object.keys(SKILL_ICONS).find(
-                  (k) => k.toLowerCase() === name.toLowerCase()
-                ) || name;
-              const icon = SKILL_ICONS[iconKey] || SKILL_ICONS["React"]; // Fallback icon
-
-              return (
-                <div
-                  key={name}
-                  className="skill-card group relative bg-white/[0.03] border border-white/5 p-8 md:p-12 flex flex-col items-center justify-center gap-6 hover:bg-white/[0.06] transition-all duration-500 hover:-translate-y-2 overflow-hidden"
-                >
-                  {/* Background Glow */}
-                  <div className="absolute inset-0 bg-linear-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl" />
-
-                  <div className="text-gray-400 group-hover:text-white transition-colors duration-300 transform group-hover:scale-110">
-                    {icon}
+            {skillsData && skillsData.length > 0 ? (
+              skillsData.map((skill, index) => {
+                return (
+                  <div
+                    key={skill._id || skill.name || index}
+                    className="skill-card group relative bg-white/3 border border-white/5 p-8 md:p-12 flex flex-col items-center justify-center gap-6 hover:bg-white/6 transition-all duration-500 overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-linear-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl" />
+                    <div className="text-gray-400 group-hover:text-white transition-colors duration-300 transform group-hover:scale-110">
+                      {skill.icon ? (
+                        <div className="w-12 h-12 relative flex items-center justify-center">
+                          <Image
+                            src={skill.icon}
+                            alt={skill.name || "Skill Icon"}
+                            width={48}
+                            height={48}
+                            className="w-full h-full object-contain filter grayscale group-hover:grayscale-0 transition-all duration-500"
+                            unoptimized={skill.icon.endsWith(".svg")}
+                          />
+                        </div>
+                      ) : (
+                        <Code2 className="w-12 h-12" />
+                      )}
+                    </div>
+                    <span className="text-sm font-bold uppercase tracking-widest text-gray-500 group-hover:text-white transition-colors">
+                      {skill.name}
+                    </span>
+                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <ArrowUpRight className="w-4 h-4 text-white" />
+                    </div>
                   </div>
-                  <span className="text-sm font-bold uppercase tracking-widest text-gray-500 group-hover:text-white transition-colors">
-                    {name}
-                  </span>
-
-                  <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <ArrowUpRight className="w-4 h-4 text-white" />
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })
+            ) : (
+              <div className="col-span-full py-10 text-center text-gray-500 font-mono text-xs uppercase tracking-widest">
+                {!loading && skillsData.length === 0
+                  ? "No skills found in database."
+                  : "Syncing Skills Arsenal..."}
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -473,32 +224,39 @@ export default function AboutPage() {
           </div>
 
           <div className="rewards-list flex flex-col border-t border-white/10">
-            {(recognition.awards || []).map((item, i) => (
-              <div
-                key={i}
-                className="reward-item group flex flex-col md:flex-row justify-between items-center py-10 border-b border-white/10 hover:bg-white/2 transition-colors cursor-default px-4"
-              >
-                <div className="flex items-center gap-6 w-full md:w-1/3">
-                  <Trophy className="w-6 h-6 text-gray-600 group-hover:text-primary transition-colors" />
-                  <span className="text-xl font-bold text-white">
-                    {item.title}
-                  </span>
+            {console.log("DEBUG: Mapping awards:", recognition.awards)}
+            {recognition.awards && recognition.awards.length > 0 ? (
+              recognition.awards.map((item, i) => (
+                <div
+                  key={i}
+                  className="reward-item group flex flex-col md:flex-row justify-between items-center py-10 border-b border-white/10 hover:bg-white/2 transition-colors cursor-default px-4 text-white"
+                >
+                  <div className="flex items-center gap-6 w-full md:w-1/3">
+                    <Trophy className="w-6 h-6 text-gray-600 group-hover:text-primary transition-colors" />
+                    <span className="text-xl font-bold">{item.title}</span>
+                  </div>
+                  <div className="w-full md:w-1/3 text-center md:text-left py-2 md:py-0">
+                    <span className="text-gray-400 font-mono">
+                      {item.organization}
+                    </span>
+                  </div>
+                  <div className="w-full md:w-1/3 flex justify-between items-center">
+                    <span className="text-gray-500 group-hover:text-white transition-colors">
+                      {item.projectName}
+                    </span>
+                    <span className="text-xs border border-white/10 px-2 py-1 rounded-full text-gray-600 group-hover:border-white/30 group-hover:text-white transition-all">
+                      {item.year}
+                    </span>
+                  </div>
                 </div>
-                <div className="w-full md:w-1/3 text-center md:text-left py-2 md:py-0">
-                  <span className="text-gray-400 font-mono">
-                    {item.organization}
-                  </span>
-                </div>
-                <div className="w-full md:w-1/3 flex justify-between items-center">
-                  <span className="text-gray-500 group-hover:text-white transition-colors">
-                    {item.projectName}
-                  </span>
-                  <span className="text-xs border border-white/10 px-2 py-1 rounded-full text-gray-600 group-hover:border-white/30 group-hover:text-white transition-all">
-                    {item.year}
-                  </span>
-                </div>
+              ))
+            ) : (
+              <div className="py-20 text-center text-gray-500 font-mono text-xs">
+                {aboutData
+                  ? "No awards found in recognition section."
+                  : "Loading recognition data..."}
               </div>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -510,29 +268,38 @@ export default function AboutPage() {
         </h2>
 
         <div className="experience-list flex flex-col">
-          {(experience.jobs || []).map((job, i) => (
-            <div
-              key={i}
-              className="experience-item group flex flex-col md:flex-row justify-between items-center py-10 border-b border-white/10 hover:border-white transition-colors cursor-pointer"
-            >
-              <div className="text-center md:text-left mb-4 md:mb-0">
-                <h4 className="text-2xl md:text-3xl font-bold text-white group-hover:pl-4 transition-all duration-300">
-                  {job.role}
-                </h4>
-                <span className="text-gray-500 mt-1 block group-hover:pl-4 transition-all duration-300 delay-75">
-                  {job.company}
-                </span>
-              </div>
-              <div className="flex items-center gap-8">
-                <span className="font-mono text-sm text-gray-500">
-                  {job.duration}
-                </span>
-                <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center -rotate-45 group-hover:rotate-0 transition-transform duration-300">
-                  <ArrowUpRight className="text-white w-5 h-5" />
+          {console.log("DEBUG: Mapping jobs:", experience.jobs)}
+          {experience.jobs && experience.jobs.length > 0 ? (
+            experience.jobs.map((job, i) => (
+              <div
+                key={i}
+                className="experience-item group flex flex-col md:flex-row justify-between items-center py-10 border-b border-white/10 hover:border-white transition-colors cursor-pointer text-white"
+              >
+                <div className="text-center md:text-left mb-4 md:mb-0">
+                  <h4 className="text-2xl md:text-3xl font-bold group-hover:pl-4 transition-all duration-300">
+                    {job.role}
+                  </h4>
+                  <span className="text-gray-500 mt-1 block group-hover:pl-4 transition-all duration-300 delay-75">
+                    {job.company}
+                  </span>
+                </div>
+                <div className="flex items-center gap-8">
+                  <span className="font-mono text-sm text-gray-500">
+                    {job.duration}
+                  </span>
+                  <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center -rotate-45 group-hover:rotate-0 transition-transform duration-300">
+                    <ArrowUpRight className="text-white w-5 h-5" />
+                  </div>
                 </div>
               </div>
+            ))
+          ) : (
+            <div className="py-20 text-center text-gray-500 font-mono text-xs">
+              {aboutData
+                ? "No career items found in experience section."
+                : "Loading career data..."}
             </div>
-          ))}
+          )}
         </div>
       </section>
     </main>
