@@ -169,6 +169,7 @@ export default function AboutPage() {
           <div className="skills-grid grid grid-cols-2 md:grid-cols-4 gap-4">
             {skillsData && skillsData.length > 0 ? (
               skillsData.map((skill, index) => {
+                console.log({ skill });
                 return (
                   <div
                     key={skill._id || skill.name || index}

@@ -94,7 +94,7 @@ export default function Projects({ data = {} }) {
           window.removeEventListener("page-transition-complete", runAnimations);
       }
     },
-    { dependencies: [loading], scope: containerRef }
+    { dependencies: [loading], scope: containerRef },
   );
 
   return (
@@ -201,7 +201,11 @@ export default function Projects({ data = {} }) {
 
                     <div className="flex justify-between">
                       <p className="text-xs font-mono text-gray-500 uppercase tracking-widest">
-                        {project.type || project.subtitle || "Digital Product"}
+                        {Array.isArray(project.category)
+                          ? project.category.join(", ")
+                          : project.category ||
+                            project.subtitle ||
+                            "Digital Product"}
                       </p>
                       <div className="overflow-hidden">
                         <span className="block text-[10px] font-mono text-primary uppercase translate-y-full group-hover:translate-y-0 transition-transform duration-500">

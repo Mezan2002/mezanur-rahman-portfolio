@@ -1,6 +1,7 @@
 "use client";
 
 import AboutContentForm from "@/components/admin/AboutContentForm";
+import ContactContentForm from "@/components/admin/ContactContentForm";
 import HomeContentForm from "@/components/admin/HomeContentForm";
 
 import Toast from "@/components/admin/Toast";
@@ -155,6 +156,24 @@ export default function ContentEditorPage() {
           } else {
             setData({});
           }
+        } else if (pageId === "contact") {
+          const response = await getSiteSettings();
+          if (response.success && response.data) {
+            const b = response.data.contactPage || {};
+            const flatData = {
+              emailjs_service_id: b.emailjs?.serviceId || "",
+              emailjs_template_id: b.emailjs?.templateId || "",
+              emailjs_public_key: b.emailjs?.publicKey || "",
+
+              contact_email: b.contactEmail || "",
+              social_github: b.socialLinks?.github || "",
+              social_linkedin: b.socialLinks?.linkedin || "",
+              social_twitter: b.socialLinks?.twitter || "",
+            };
+            setData(flatData);
+          } else {
+            setData({});
+          }
         } else {
           setData(pageContent[pageId] || null);
         }
@@ -300,6 +319,24 @@ export default function ContentEditorPage() {
 
         await updateSiteSettings(nestedData);
         showToast("About page content updated.");
+      } else if (pageId === "contact") {
+        const nestedData = {
+          contactPage: {
+            emailjs: {
+              serviceId: formData.emailjs_service_id,
+              templateId: formData.emailjs_template_id,
+              publicKey: formData.emailjs_public_key,
+            },
+            contactEmail: formData.contact_email,
+            socialLinks: {
+              github: formData.social_github,
+              linkedin: formData.social_linkedin,
+              twitter: formData.social_twitter,
+            },
+          },
+        };
+        await updateSiteSettings(nestedData);
+        showToast("Contact settings updated.");
       } else {
         console.log("Saving Generic Content:", formData);
         showToast(`${data.title} updated successfully.`);
@@ -391,6 +428,36 @@ export default function ContentEditorPage() {
           </header>
 
           <AboutContentForm initialData={data} onSubmit={handleSave} />
+        </div>
+      </div>
+    );
+  }
+
+  // Specialized Contact Form
+  if (pageId === "contact") {
+    return (
+      <div
+        ref={containerRef}
+        className="min-h-screen bg-black rounded-3xl text-white relative"
+      >
+        <Toast
+          isVisible={toast.isVisible}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
+        />
+
+        <div>
+          <header className="parent-animate-in p-8 md:p-12">
+            <h1 className="text-6xl md:text-8xl font-black font-syne uppercase tracking-tighter mb-4">
+              Edit <span className="text-primary">Contact</span>
+            </h1>
+            <p className="text-gray-500 font-mono uppercase tracking-widest text-sm">
+              EmailJS Credentials & Links
+            </p>
+          </header>
+
+          <ContactContentForm initialData={data} onSubmit={handleSave} />
         </div>
       </div>
     );

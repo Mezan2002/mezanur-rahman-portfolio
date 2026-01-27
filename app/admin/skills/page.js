@@ -4,6 +4,7 @@ import ConfirmationModal from "@/components/admin/ConfirmationModal";
 import { createSkill, deleteSkill, getSkills } from "@/lib/api";
 import gsap from "gsap";
 import { Plus, Search, Trash2, Wrench } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 export default function SkillsPage() {
@@ -65,7 +66,7 @@ export default function SkillsPage() {
         gsap.fromTo(
           `.skill-card[data-id="${res.data._id}"]`,
           { opacity: 0, scale: 0.8 },
-          { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }
+          { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" },
         );
       }, 100);
     } catch (err) {
@@ -91,7 +92,7 @@ export default function SkillsPage() {
   };
 
   const filteredSkills = skills.filter((skill) =>
-    skill.name.toLowerCase().includes(searchTerm.toLowerCase())
+    skill.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -196,11 +197,13 @@ export default function SkillsPage() {
             >
               <div className="w-12 h-12 relative grayscale group-hover:grayscale-0 transition-all duration-500 transform group-hover:scale-110">
                 {/* Fallback to text if image fails or use generic icon */}
-                {skill.icon && skill.icon.startsWith("http") ? (
-                  <img
+                {skill.icon ? (
+                  <Image
                     src={skill.icon}
                     alt={skill.name}
                     className="w-full h-full object-contain"
+                    width={50}
+                    height={50}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-white/10 rounded-full text-xs font-mono">

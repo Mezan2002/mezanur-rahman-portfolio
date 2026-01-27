@@ -3,6 +3,7 @@
 import ConfirmationModal from "@/components/admin/ConfirmationModal";
 import { deleteProject, getProjectById } from "@/lib/api";
 import gsap from "gsap";
+import parse from "html-react-parser";
 import {
   ArrowLeft,
   Calendar,
@@ -11,7 +12,7 @@ import {
   Github,
   Loader2,
   Trash2,
-  User,
+  Users,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -130,27 +131,37 @@ export default function ProjectPreviewPage() {
       {/* Hero Section */}
       <div className="space-y-12 mb-20">
         <div className="animate-enter">
-          <p className="text-xs font-mono text-primary mb-4 tracking-[0.3em] uppercase">
-            {project.category || "Project Case Study"}
-          </p>
+          <div className="flex flex-wrap gap-2 mb-6">
+            {(Array.isArray(project.category) ? project.category : []).map(
+              (cat, idx) => (
+                <span
+                  key={idx}
+                  className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-bold font-syne uppercase tracking-wider text-primary"
+                >
+                  {cat}
+                </span>
+              ),
+            )}
+            {!project.category?.length && (
+              <p className="text-xs font-mono text-primary tracking-[0.3em] uppercase">
+                Project Case Study
+              </p>
+            )}
+          </div>
           <h1 className="text-6xl md:text-8xl font-black font-syne text-white uppercase leading-[0.9] tracking-tighter">
             {project.title}
           </h1>
           {project.subtitle && (
-            <p className="text-2xl md:text-3xl font-bold font-syne text-gray-500 uppercase mt-4">
+            <p className="text-2xl md:text-3xl font-bold font-syne text-gray-400 uppercase mt-4">
               {project.subtitle}
             </p>
           )}
         </div>
 
         {/* Featured Image */}
-        <div className="relative aspect-21/9 rounded-3xl overflow-hidden animate-enter border border-white/5">
+        <div className="relative aspect-video rounded-3xl overflow-hidden animate-enter border border-white/5">
           <Image
-            src={
-              project.image ||
-              project.featuredImage ||
-              "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=2564"
-            }
+            src={project.thumbnail}
             alt={project.title}
             fill
             className="object-cover"
@@ -163,40 +174,90 @@ export default function ProjectPreviewPage() {
       {/* Details Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 animate-enter">
         {/* Left: Metadata */}
-        <div className="lg:col-span-4 space-y-10">
-          <div className="grid grid-cols-2 gap-8">
+        <div className="lg:col-span-4 space-y-16">
+          <div className="space-y-4">
             <div className="space-y-1">
               <span className="text-[10px] font-mono text-gray-600 uppercase tracking-widest flex items-center gap-2">
-                <User size={12} /> Client
+                <Users size={12} /> Client
               </span>
-              <p className="text-lg font-bold text-white">
-                {project.clientName || "N/A"}
+              <p className="text-lg font-bold text-white uppercase font-syne">
+                {project.clientName || "—"}
               </p>
             </div>
             <div className="space-y-1">
               <span className="text-[10px] font-mono text-gray-600 uppercase tracking-widest flex items-center gap-2">
                 <Calendar size={12} /> Year
               </span>
-              <p className="text-lg font-bold text-white">
+              <p className="text-lg font-bold text-white uppercase font-syne">
                 {project.year || "—"}
               </p>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <span className="text-[10px] font-mono text-gray-600 uppercase tracking-widest">
-              Technologies Used
+          <div className="space-y-6">
+            <span className="text-[10px] font-mono text-gray-600 uppercase tracking-widest block">
+              Architecture
             </span>
             <div className="flex flex-wrap gap-2">
-              {(project.technologies || []).map((tech, i) => (
-                <span
-                  key={i}
-                  className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs text-gray-400 font-mono"
-                >
-                  {tech}
-                </span>
-              ))}
+              {(project.technologies || []).map((tech, i) => {
+                const name = typeof tech === "string" ? tech : tech.name;
+                const cat = typeof tech === "object" ? tech.category : null;
+                return (
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full group/chip"
+                  >
+                    <span className="text-[10px] font-bold font-syne text-white uppercase tracking-wider">
+                      {name}
+                    </span>
+                    {cat && (
+                      <span className="text-[8px] font-mono uppercase tracking-tighter text-primary px-1 py-0.5 bg-primary/10 rounded">
+                        {cat}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
+          </div>
+
+          {/* Admin Narrative Sections (Sidebar) */}
+          <div className="space-y-12">
+            {project.technicalChallenges && (
+              <div className="relative pl-6 border-l border-white/5">
+                <h3 className="text-[10px] text-primary uppercase tracking-widest mb-4 font-mono flex items-center gap-2">
+                  <span className="w-1 h-1 bg-primary rounded-full animate-pulse"></span>
+                  Challenges
+                </h3>
+                <div className="text-gray-400 leading-relaxed whitespace-pre-wrap text-sm font-medium">
+                  {project.technicalChallenges}
+                </div>
+              </div>
+            )}
+
+            {project.solutions && (
+              <div className="relative pl-6 border-l border-white/5">
+                <h3 className="text-[10px] text-primary uppercase tracking-widest mb-4 font-mono flex items-center gap-2">
+                  <span className="w-1 h-1 bg-primary rounded-full animate-pulse"></span>
+                  Solutions
+                </h3>
+                <div className="text-gray-400 leading-relaxed whitespace-pre-wrap text-sm font-medium">
+                  {project.solutions}
+                </div>
+              </div>
+            )}
+
+            {project.problemAndSolution && (
+              <div className="relative pl-6 border-l border-white/5">
+                <h3 className="text-[10px] text-primary uppercase tracking-widest mb-4 font-mono flex items-center gap-2">
+                  <span className="w-1 h-1 bg-primary rounded-full animate-pulse"></span>
+                  Overview
+                </h3>
+                <div className="text-gray-400 leading-relaxed whitespace-pre-wrap text-sm font-medium">
+                  {project.problemAndSolution}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="space-y-4 pt-4">
@@ -230,11 +291,11 @@ export default function ProjectPreviewPage() {
 
         {/* Right: Content */}
         <div className="lg:col-span-8">
-          <h3 className="text-xs font-mono text-gray-600 uppercase tracking-[0.3em] mb-6">
+          <h3 className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.3em] mb-8 pb-4 border-b border-white/5">
             The Story
           </h3>
-          <div className="prose prose-invert prose-lg max-w-none text-gray-400">
-            {project.description}
+          <div className="prose prose-invert prose-lg max-w-none text-gray-300 leading-relaxed font-medium">
+            {parse(project.description || "")}
           </div>
 
           {/* Gallery Preview */}

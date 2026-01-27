@@ -45,7 +45,7 @@ export default function ProjectsPage() {
     try {
       await deleteProject(id);
       setProjects(
-        projects.filter((project) => (project._id || project.id) !== id)
+        projects.filter((project) => (project._id || project.id) !== id),
       );
       setDeleteModal({ isOpen: false, id: null });
     } catch (err) {
@@ -89,7 +89,7 @@ export default function ProjectsPage() {
             stagger: 0.1,
             ease: "power2.out",
           },
-          "-=0.5"
+          "-=0.5",
         );
 
         // List Animation
@@ -103,7 +103,7 @@ export default function ProjectsPage() {
             duration: 0.8,
             ease: "power2.out",
             delay: 0.4,
-          }
+          },
         );
       }, containerRef);
 
@@ -181,9 +181,9 @@ export default function ProjectsPage() {
                 <div className="w-full md:w-4/12 mb-4 md:mb-0 relative py-2">
                   {/* Floating Image inside Title Area */}
                   <div className="absolute top-1/2 left-0 md:left-12 -translate-y-1/2 w-[240px] h-[160px] pointer-events-none opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300 ease-out z-30 rounded-lg overflow-hidden translate-x-4 md:translate-x-12 shadow-2xl origin-left bg-dark-background border border-white/10">
-                    {project.image || project.featuredImage ? (
+                    {project.thumbnail ? (
                       <Image
-                        src={project.image || project.featuredImage}
+                        src={project.thumbnail}
                         alt={project.title}
                         fill
                         className="object-cover"
@@ -203,25 +203,25 @@ export default function ProjectsPage() {
 
                   <div className="relative z-10">
                     <h3
-                      className="text-2xl md:text-3xl font-bold text-white group-hover:text-transparent group-hover:stroke-white transition-all duration-300 font-syne uppercase break-words"
+                      className="text-2xl md:text-3xl font-bold text-white group-hover:text-transparent group-hover:stroke-white transition-all duration-300 font-syne uppercase wrap-break-word"
                       style={{ WebkitTextStroke: "1px transparent" }}
                     >
-                      <span className="group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-white/10 transition-all group-hover:blur-[1px]">
+                      <h5 className="group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-white/10 transition-all group-hover:blur-[1px] line-clamp-1">
                         {project.title}
-                      </span>
+                      </h5>
                     </h3>
-                    <span className="text-gray-500 text-xs font-light group-hover:text-white transition-colors delay-75 block mt-1 group-hover:translate-x-2 transition-transform duration-300">
+                    <p className="text-gray-500 text-xs font-light group-hover:text-white transition-colors delay-75 line-clamp-1 mt-1 duration-300">
                       {project.subtitle || "No subtitle"}
-                    </span>
+                    </p>
                   </div>
                 </div>
 
                 <div className="w-full md:w-3/12 mb-2 md:mb-0 relative z-20 pointer-events-none">
-                  <span className="text-gray-400 uppercase tracking-widest text-sm border px-3 py-1 rounded-full border-white/10 group-hover:border-white/30 transition-colors">
-                    {typeof project.category === "object"
-                      ? project.category.name
-                      : project.category || project.type || "—"}
-                  </span>
+                  <p className="text-gray-500 text-xs font-mono uppercase tracking-widest mt-1 block wrap-break-word">
+                    {Array.isArray(project.category)
+                      ? project.category.join(", ")
+                      : project.category || "—"}
+                  </p>
                 </div>
 
                 <div className="w-full md:w-2/12 mb-2 md:mb-0 relative z-20 pointer-events-none">

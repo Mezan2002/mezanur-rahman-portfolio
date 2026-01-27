@@ -1,6 +1,7 @@
 "use client";
 
 import ImageUploader from "@/components/admin/ImageUploader";
+import TiptapEditor from "@/components/admin/TiptapEditor";
 import gsap from "gsap";
 import { ArrowLeft, Loader2, Plus, Save, X } from "lucide-react";
 import Image from "next/image";
@@ -18,28 +19,48 @@ export default function ProjectForm({
   const [title, setTitle] = useState(initialData.title || "");
   const [description, setDescription] = useState(initialData.description || "");
   const [featuredImage, setFeaturedImage] = useState(
-    initialData.image || initialData.featuredImage || ""
+    initialData.thumbnail || "",
   );
   // New: Gallery State for multiple images
   const [gallery, setGallery] = useState(
-    initialData.gallery || initialData.images || []
+    initialData.gallery || initialData.images || [],
   );
   const [subtitle, setSubtitle] = useState(initialData.subtitle || "");
-  const [type, setType] = useState(initialData.type || "");
   const [year, setYear] = useState(
-    initialData.year || new Date().getFullYear().toString()
+    initialData.year || new Date().getFullYear().toString(),
   );
-  const [category, setCategory] = useState(initialData.category || "");
+  const [category, setCategory] = useState(
+    Array.isArray(initialData.category)
+      ? initialData.category.join(", ")
+      : initialData.category || "",
+  );
   const [technologies, setTechnologies] = useState(
     Array.isArray(initialData.technologies)
-      ? initialData.technologies.join(", ")
-      : initialData.technologies || ""
+      ? initialData.technologies
+          .map((t) =>
+            typeof t === "string"
+              ? t
+              : t.category
+                ? `${t.name}:${t.category}`
+                : t.name,
+          )
+          .join(", ")
+      : initialData.technologies || "",
   );
   const [clientName, setClientName] = useState(initialData.clientName || "");
   const [projectUrl, setProjectUrl] = useState(initialData.projectUrl || "");
   const [githubUrl, setGithubUrl] = useState(initialData.githubUrl || "");
   const [status, setStatus] = useState(initialData.status || "draft");
   const [featured, setFeatured] = useState(initialData.featured || false);
+
+  // New Narrative States
+  const [technicalChallenges, setTechnicalChallenges] = useState(
+    initialData.technicalChallenges || "",
+  );
+  const [solutions, setSolutions] = useState(initialData.solutions || "");
+  const [problemAndSolution, setProblemAndSolution] = useState(
+    initialData.problemAndSolution || "",
+  );
 
   // UI States
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,12 +72,29 @@ export default function ProjectForm({
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setTitle(initialData.title || "");
       setDescription(initialData.description || "");
-      setFeaturedImage(initialData.image || initialData.featuredImage || "");
-      setCategory(initialData.category || "");
+      setFeaturedImage(
+        initialData.thumbnail ||
+          initialData.image ||
+          initialData.featuredImage ||
+          "",
+      );
+      setCategory(
+        Array.isArray(initialData.category)
+          ? initialData.category.join(", ")
+          : initialData.category || "",
+      );
       setTechnologies(
         Array.isArray(initialData.technologies)
-          ? initialData.technologies.join(", ")
-          : initialData.technologies || ""
+          ? initialData.technologies
+              .map((t) =>
+                typeof t === "string"
+                  ? t
+                  : t.category
+                    ? `${t.name}:${t.category}`
+                    : t.name,
+              )
+              .join(", ")
+          : initialData.technologies || "",
       );
       setClientName(initialData.clientName || "");
       setProjectUrl(initialData.liveLink || initialData.projectUrl || "");
@@ -64,10 +102,14 @@ export default function ProjectForm({
       setStatus(initialData.status || "draft");
       setFeatured(initialData.featured || false);
       setSubtitle(initialData.subtitle || "");
-      setType(initialData.type || "");
       setYear(initialData.year || "");
       // Initialize gallery
       setGallery(initialData.gallery || initialData.images || []);
+
+      // Narrative fields
+      setTechnicalChallenges(initialData.technicalChallenges || "");
+      setSolutions(initialData.solutions || "");
+      setProblemAndSolution(initialData.problemAndSolution || "");
     }
   }, [initialData]);
 
@@ -95,29 +137,43 @@ export default function ProjectForm({
     setIsSubmitting(true);
     setError(null);
 
-    // Format Technologies
+    // Format Technologies as Array of Objects (Supports name:category)
     const technologiesArray = technologies
       ? technologies
           .split(",")
-          .map((tech) => tech.trim())
+          .map((item) => {
+            const parts = item.split(":").map((s) => s.trim());
+            return {
+              name: parts[0],
+              category: parts[1] || "Development",
+            };
+          })
+          .filter((t) => t.name)
+      : [];
+
+    // Format Category as Array of Strings
+    const categoriesArray = category
+      ? category
+          .split(",")
+          .map((cat) => cat.trim())
           .filter(Boolean)
       : [];
 
     const projectData = {
       title,
       subtitle,
-      type,
       year,
       description,
-      image:
-        featuredImage ||
-        "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?q=80&w=2574&auto=format&fit=crop",
-      gallery, // Add gallery to payload
-      category,
+      thumbnail: featuredImage,
+      gallery,
+      category: categoriesArray,
       technologies: technologiesArray,
       clientName,
       liveLink: projectUrl,
       githubLink: githubUrl,
+      technicalChallenges,
+      solutions,
+      problemAndSolution,
       status,
       featured,
     };
@@ -200,75 +256,100 @@ export default function ProjectForm({
           />
         </div>
 
-        {/* Description Input */}
-        <div className="animate-in group relative">
+        {/* Description - Rich Text Editor */}
+        <div className="animate-in relative mx-8 md:mx-12 pt-5 md:pt-8">
+          <div className="absolute -left-12 top-0 h-full w-px bg-linear-to-b from-primary/50 to-transparent hidden xl:block"></div>
+          <label className="flex text-xs font-mono uppercase tracking-widest text-primary mb-6 items-center gap-2">
+            <span className="w-1 h-1 bg-primary rounded-full"></span>
+            Project Description
+          </label>
+          <div className="prose prose-invert prose-lg max-w-none">
+            <TiptapEditor content={description} onChange={setDescription} />
+          </div>
+        </div>
+
+        {/* Technical Challenges */}
+        <div className="animate-in relative group/field pb-8 border-b border-white/5">
+          <label className="flex text-[10px] font-mono uppercase tracking-[0.2em] text-gray-600 mb-4 items-center gap-2 group-focus-within/field:text-primary transition-colors">
+            Technical Challenges
+          </label>
           <textarea
-            placeholder="Project description..."
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full bg-transparent text-xl font-medium text-gray-400 placeholder-gray-800 outline-none resize-none h-32 border-l-2 border-transparent pl-1 focus:border-primary/50 transition-colors"
+            value={technicalChallenges}
+            onChange={(e) => setTechnicalChallenges(e.target.value)}
+            placeholder="What were the core hurdles?"
+            className="w-full bg-transparent p-0 text-xl font-bold font-syne text-white placeholder-gray-800 outline-none border-none focus:placeholder-white/10 transition-all min-h-[100px] resize-y whitespace-pre-wrap"
+          />
+        </div>
+
+        {/* Solutions Implemented */}
+        <div className="animate-in relative group/field pb-8 border-b border-white/5">
+          <label className="flex text-[10px] font-mono uppercase tracking-[0.2em] text-gray-600 mb-4 items-center gap-2 group-focus-within/field:text-primary transition-colors">
+            Solutions Implemented
+          </label>
+          <textarea
+            value={solutions}
+            onChange={(e) => setSolutions(e.target.value)}
+            placeholder="How did you solve them?"
+            className="w-full bg-transparent p-0 text-xl font-bold font-syne text-white placeholder-gray-800 outline-none border-none focus:placeholder-white/10 transition-all min-h-[100px] resize-y whitespace-pre-wrap"
+          />
+        </div>
+
+        {/* Problem and Solution Overview */}
+        <div className="animate-in relative group/field pb-8 border-b border-white/5">
+          <label className="flex text-[10px] font-mono uppercase tracking-[0.2em] text-gray-600 mb-4 items-center gap-2 group-focus-within/field:text-primary transition-colors">
+            Problem and Solution Overview
+          </label>
+          <textarea
+            value={problemAndSolution}
+            onChange={(e) => setProblemAndSolution(e.target.value)}
+            placeholder="A quick summary of the journey..."
+            className="w-full bg-transparent p-0 text-xl font-bold font-syne text-white placeholder-gray-800 outline-none border-none focus:placeholder-white/10 transition-all min-h-[100px] resize-y whitespace-pre-wrap"
           />
         </div>
 
         {/* Metadata Ribbon */}
         <div className="animate-in flex flex-col gap-8">
-          {/* Row 1: Category, Client, Tech Stack */}
+          {/* Row 1: Category, Year, Client */}
           <div className="flex flex-wrap items-center gap-4 md:gap-8 pb-8 border-b border-white/5">
             {/* Category */}
             <div className="flex-1 min-w-[200px] relative group">
               <input
                 type="text"
-                placeholder="Category..."
+                placeholder="Design, Development..."
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-transparent py-2 text-lg font-bold font-syne text-white placeholder-gray-700 outline-none border-none focus:placeholder-white/20 transition-all"
+                className="w-full bg-transparent py-2 text-lg font-bold font-syne text-white placeholder-gray-700 outline-none border-none focus:placeholder-white/20 transition-all uppercase"
               />
               <span className="absolute -top-4 left-0 text-[10px] font-mono uppercase tracking-widest text-gray-600 group-focus-within:text-primary transition-colors">
-                Category
+                Categories
               </span>
             </div>
 
             <div className="w-px h-12 bg-white/10 hidden md:block"></div>
 
-            {/* Type & Year */}
             <div className="flex-1 min-w-[200px] relative group">
-              <input
-                type="text"
-                placeholder="Development..."
-                value={type}
-                onChange={(e) => setType(e.target.value)}
-                className="w-full bg-transparent py-2 text-lg font-bold font-syne text-white placeholder-gray-700 outline-none border-none focus:placeholder-white/20 transition-all"
-              />
-              <span className="absolute -top-4 left-0 text-[10px] font-mono uppercase tracking-widest text-gray-600 group-focus-within:text-primary transition-colors">
-                Type
-              </span>
-            </div>
-
-            <div className="w-px h-12 bg-white/10 hidden md:block"></div>
-
-            <div className="flex-1 min-w-[100px] relative group">
               <input
                 type="text"
                 placeholder="2024"
                 value={year}
                 onChange={(e) => setYear(e.target.value)}
-                className="w-full bg-transparent py-2 text-lg font-bold font-syne text-white placeholder-gray-700 outline-none border-none focus:placeholder-white/20 transition-all"
+                className="w-full bg-transparent py-2 text-lg font-bold font-syne text-white placeholder-gray-700 outline-none border-none focus:placeholder-white/20 transition-all uppercase"
               />
               <span className="absolute -top-4 left-0 text-[10px] font-mono uppercase tracking-widest text-gray-600 group-focus-within:text-primary transition-colors">
                 Year
               </span>
             </div>
-          </div>
 
-          {/* Row 2: Client & Category */}
-          <div className="flex flex-wrap items-center gap-4 md:gap-8 pb-8 border-b border-white/5">
+            <div className="w-px h-12 bg-white/10 hidden md:block"></div>
+
+            {/* Client Name */}
             <div className="flex-1 min-w-[200px] relative group">
               <input
                 type="text"
-                placeholder="Client Name..."
+                placeholder="Client name..."
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
-                className="w-full bg-transparent py-2 text-lg font-bold font-syne text-white placeholder-gray-700 outline-none border-none focus:placeholder-white/20 transition-all"
+                className="w-full bg-transparent py-2 text-lg font-bold font-syne text-white placeholder-gray-700 outline-none border-none focus:placeholder-white/20 transition-all uppercase"
               />
               <span className="absolute -top-4 left-0 text-[10px] font-mono uppercase tracking-widest text-gray-600 group-focus-within:text-primary transition-colors">
                 Client
@@ -278,17 +359,39 @@ export default function ProjectForm({
 
           {/* Row 2: Technologies */}
           <div className="pb-8 border-b border-white/5">
-            <div className="relative group">
-              <input
-                type="text"
-                placeholder="React, Node.js, MongoDB..."
+            <div className="relative group/tech">
+              <textarea
+                placeholder="React:Frontend, Node.js:Backend, GSAP:Animation..."
                 value={technologies}
                 onChange={(e) => setTechnologies(e.target.value)}
-                className="w-full bg-transparent py-2 text-lg font-bold font-syne text-white placeholder-gray-700 outline-none border-none focus:placeholder-white/20 transition-all"
+                className="w-full bg-transparent p-0 text-xl font-bold font-syne text-white placeholder-gray-800 outline-none border-none focus:placeholder-white/10 transition-all min-h-[60px] resize-none uppercase"
               />
-              <span className="absolute -top-4 left-0 text-[10px] font-mono uppercase tracking-widest text-gray-600 group-focus-within:text-primary transition-colors">
-                Tech Stack (comma separated)
+              <span className="absolute -top-4 left-0 text-[10px] font-mono uppercase tracking-widest text-gray-600 group-focus-within/tech:text-primary transition-colors">
+                Tech Stack
               </span>
+
+              {/* Visual Chips for Tech Stack */}
+              <div className="flex flex-wrap gap-2 mt-4">
+                {technologies.split(",").map((item, i) => {
+                  const parts = item.split(":").map((s) => s.trim());
+                  if (!parts[0]) return null;
+                  return (
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full group/chip hover:border-primary/30 transition-colors"
+                    >
+                      <span className="text-xs font-bold font-syne text-white">
+                        {parts[0]}
+                      </span>
+                      {parts[1] && (
+                        <span className="text-[9px] font-mono uppercase tracking-tighter text-primary px-1.5 py-0.5 bg-primary/10 rounded">
+                          {parts[1]}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
 

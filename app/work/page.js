@@ -35,11 +35,12 @@ export default function WorkPage() {
     filter === "all"
       ? projects
       : projects.filter((p) => {
-          const categoryName =
-            typeof p.category === "object"
-              ? p.category?.name?.toLowerCase()
-              : p.category?.toLowerCase();
-          return categoryName === filter;
+          const categories = Array.isArray(p.category)
+            ? p.category
+            : [p.category];
+          return categories.some(
+            (cat) => cat?.toLowerCase() === filter.toLowerCase(),
+          );
         });
 
   useEffect(() => {
@@ -64,7 +65,7 @@ export default function WorkPage() {
           stagger: 0.1,
           ease: "power2.out",
         },
-        "-=0.5"
+        "-=0.5",
       );
 
       // List Animation
@@ -79,7 +80,7 @@ export default function WorkPage() {
             duration: 0.8,
             ease: "power2.out",
             delay: 0.4,
-          }
+          },
         );
       }
     }, containerRef);
@@ -167,11 +168,10 @@ export default function WorkPage() {
 
             {filteredProjects.map((project, index) => {
               const projectId = project._id || project.id;
-              const projectType =
-                typeof project.category === "object"
-                  ? project.category.name
-                  : project.category || project.type || "Development";
-              const projectImage = project.image || project.featuredImage;
+              const projectType = Array.isArray(project.category)
+                ? project.category.join(", ")
+                : project.category || "Development";
+              const projectImage = project?.thumbnail;
 
               return (
                 <Link
@@ -213,18 +213,18 @@ export default function WorkPage() {
                         className="text-4xl md:text-6xl font-bold text-white group-hover:text-transparent group-hover:stroke-white transition-all duration-300 font-syne uppercase"
                         style={{ WebkitTextStroke: "1px transparent" }}
                       >
-                        <span className="group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-white/10 transition-all group-hover:blur-[1px]">
+                        <h5 className="group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-white/10 transition-all group-hover:blur-[1px] line-clamp-1">
                           {project.title}
-                        </span>
+                        </h5>
                       </h3>
-                      <span className="text-gray-500 text-lg font-light group-hover:text-white transition-colors delay-75 block mt-2 group-hover:translate-x-2 transition-transform duration-300">
+                      <p className="text-gray-500 text-lg font-light group-hover:text-white delay-75 line-clamp-1 mt-2 transition-transform duration-300">
                         {project.subtitle || "Selected Works"}
-                      </span>
+                      </p>
                     </div>
                   </div>
 
                   <div className="w-full md:w-3/12 mb-2 md:mb-0 relative z-20 pointer-events-none">
-                    <span className="text-gray-400 uppercase tracking-widest text-sm border px-3 py-1 rounded-full border-white/10 group-hover:border-white/30 transition-colors">
+                    <span className="text-gray-400 uppercase tracking-widest text-xs py-1 transition-colors">
                       {projectType}
                     </span>
                   </div>
