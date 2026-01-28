@@ -165,7 +165,7 @@ export default function ProjectsPage() {
         {/* LIST */}
         <div className="flex flex-col w-full">
           {/* Table Header */}
-          <div className="hidden md:flex text-xs text-gray-600 uppercase tracking-widest pb-4 border-b border-white/10">
+          <div className="hidden md:flex text-xs text-gray-600 uppercase tracking-widest pb-4 border-b border-white/10 gap-5">
             <div className="w-1/12">No.</div>
             <div className="w-4/12">Project</div>
             <div className="w-3/12">Services</div>
@@ -185,7 +185,7 @@ export default function ProjectsPage() {
               <Link
                 href={`/admin/projects/${projectId}`}
                 key={projectId}
-                className="project-row group py-6 md:py-8 border-b border-white/10 flex flex-col md:flex-row items-center md:items-baseline relative z-10 transition-colors duration-500 hover:border-white/30"
+                className="project-row group py-6 md:py-8 border-b border-white/10 flex flex-col gap-5 md:flex-row items-center md:items-baseline relative z-10 transition-colors duration-500 hover:border-white/30"
               >
                 <div className="w-full md:w-1/12 mb-4 md:mb-0 relative z-20 pointer-events-none">
                   <span className="font-mono text-xs text-gray-500 group-hover:text-white transition-colors">

@@ -1,19 +1,25 @@
 "use client";
 
+import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { useLayoutEffect, useRef } from "react";
+import { useRef } from "react";
 
 export default function Template({ children }) {
   const containerRef = useRef(null);
 
-  // Reset readiness immediately on render to prevent children from firing prematurely
-  if (typeof window !== "undefined") {
-    window.isPageReady = false;
-  }
+  useGSAP(
+    () => {
+      const tl = gsap.timeline({
+        onComplete: () => {
+          window.dispatchEvent(new CustomEvent("page-transition-complete"));
+          // Ensure container is visible
+          gsap.set(".page-content", { visibility: "visible" });
 
-  useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline();
+          import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
+            ScrollTrigger.refresh();
+          });
+        },
+      });
 
       // Columns Reveal (Slide Up)
       tl.to(".transition-column", {
@@ -27,48 +33,38 @@ export default function Template({ children }) {
       // Content Fade In
       tl.fromTo(
         ".page-content",
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" },
-        "-=0.5"
+        { autoAlpha: 0, y: 20 },
+        { autoAlpha: 1, y: 0, duration: 0.8, ease: "power3.out" },
+        "-=0.5",
       );
 
-      const finishHandoff = () => {
+      const playTransition = () => {
         tl.play();
       };
 
-      // Check session status
+      // Check session status to see if we should wait for the first-time preloader
       const hasLoadedPreloader = sessionStorage.getItem("hasLoadedSession");
 
       if (!hasLoadedPreloader) {
-        // First visit: Wait for Preloader
-        window.addEventListener("preloader-complete", finishHandoff, {
+        // First visit: Wait for Preloader signal
+        window.addEventListener("preloader-complete", playTransition, {
           once: true,
         });
 
         // Safety timeout
-        setTimeout(() => {
-          if (tl.progress() === 0) finishHandoff();
-        }, 4000);
+        const timeout = setTimeout(() => {
+          if (tl.progress() === 0) playTransition();
+        }, 5000);
+
+        return () => clearTimeout(timeout);
       } else {
-        // Subsequent visits/reloads: Play transition immediately
-        // We delay slightly to allow the DOM to stabilize
-        gsap.delayedCall(0.1, finishHandoff);
+        // Subsequent navigations: Play after a tiny delay for DOM stability
+        const timeout = setTimeout(playTransition, 150);
+        return () => clearTimeout(timeout);
       }
-
-      // Add completion signal to timeline
-      tl.eventCallback("onComplete", () => {
-        window.dispatchEvent(new CustomEvent("page-transition-complete"));
-        window.isPageReady = true;
-
-        // Ensure all ScrollTriggers are updated after transition columns disappear
-        import("gsap/ScrollTrigger").then(({ ScrollTrigger }) => {
-          ScrollTrigger.refresh();
-        });
-      });
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, []);
+    },
+    { scope: containerRef },
+  );
 
   return (
     <div ref={containerRef}>
@@ -83,8 +79,8 @@ export default function Template({ children }) {
         ))}
       </div>
 
-      {/* Page Content */}
-      <div className="page-content opacity-0">{children}</div>
+      {/* Page Content - Hidden initially to prevent flash before columns appear */}
+      <div className="page-content opacity-0 invisible">{children}</div>
     </div>
   );
 }

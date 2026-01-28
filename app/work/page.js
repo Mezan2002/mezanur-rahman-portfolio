@@ -158,7 +158,7 @@ export default function WorkPage() {
         {!loading && !error && filteredProjects.length > 0 && (
           <div className="flex flex-col w-full">
             {/* Table Header */}
-            <div className="hidden md:flex text-xs text-gray-600 uppercase tracking-widest pb-4 border-b border-white/10">
+            <div className="hidden md:flex gap-5 text-xs text-gray-600 uppercase tracking-widest pb-4 border-b border-white/10">
               <div className="w-1/12">No.</div>
               <div className="w-5/12">Project</div>
               <div className="w-3/12">Services</div>
@@ -177,7 +177,7 @@ export default function WorkPage() {
                 <Link
                   href={`/project/${projectId}`}
                   key={projectId}
-                  className="project-row group py-10 md:py-16 border-b border-white/10 flex flex-col md:flex-row items-center md:items-baseline relative z-10 transition-colors duration-500 hover:border-white/30"
+                  className="project-row group py-10 md:py-16 border-b border-white/10 flex gap-5 flex-col md:flex-row items-center md:items-baseline relative z-10 transition-colors duration-500 hover:border-white/30"
                 >
                   <div className="w-full md:w-1/12 mb-4 md:mb-0 relative z-20 pointer-events-none">
                     <span className="font-mono text-sm text-gray-500 group-hover:text-white transition-colors">
