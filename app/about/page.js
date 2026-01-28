@@ -220,7 +220,7 @@ export default function AboutPage() {
         <div className="relative z-10">
           <div className="mb-16 text-center md:text-left">
             <h2 className="reveal-text text-4xl md:text-6xl font-bold font-syne text-white uppercase tracking-tight">
-              {recognition.title || "Recognition"}
+              {recognition.title || "Awards & Recognition"}
             </h2>
           </div>
 

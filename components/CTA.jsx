@@ -3,6 +3,7 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ArrowUpRight, Copy, Mail } from "lucide-react";
+import Link from "next/link";
 import { useRef, useState } from "react";
 
 export default function CTA({ data = {} }) {
@@ -77,7 +78,7 @@ export default function CTA({ data = {} }) {
               stagger: 0.1,
               duration: 1.2,
             },
-            "-=1"
+            "-=1",
           )
           .from(
             ".rule-line",
@@ -87,7 +88,7 @@ export default function CTA({ data = {} }) {
               duration: 1.5,
               transformOrigin: "left",
             },
-            "-=1.5"
+            "-=1.5",
           );
       };
 
@@ -111,7 +112,7 @@ export default function CTA({ data = {} }) {
         }
       };
     },
-    { scope: containerRef }
+    { scope: containerRef },
   );
 
   return (
@@ -218,25 +219,27 @@ export default function CTA({ data = {} }) {
 
           {/* COL 4: THE MAIN ACTION */}
           <div className="matrix-col p-12 flex items-center justify-center lg:border-b border-white/10 bg-white/2 transition-colors hover:bg-white/5">
-            <button
-              ref={buttonRef}
-              className="group relative w-full h-full min-h-[200px] flex flex-col items-center justify-center gap-4 overflow-hidden"
-            >
-              {/* Liquid Fill Overlay */}
-              <div className="absolute inset-0 bg-primary translate-y-full group-hover:translate-y-0 transition-transform duration-700 ease-power4" />
+            <Link href="/contact" className="w-full">
+              <button
+                ref={buttonRef}
+                className="group relative w-full h-full min-h-[200px] flex flex-col items-center justify-center gap-4 overflow-hidden"
+              >
+                {/* Liquid Fill Overlay */}
+                <div className="absolute inset-0 bg-primary translate-y-full group-hover:translate-y-0 transition-transform duration-700 ease-power4" />
 
-              <div className="btn-content relative z-10 flex flex-col items-center gap-4">
-                <div className="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center group-hover:border-black group-hover:bg-black transition-all duration-500">
-                  <Mail
-                    size={24}
-                    className="text-white group-hover:text-primary"
-                  />
+                <div className="btn-content relative z-10 flex flex-col items-center gap-4">
+                  <div className="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center group-hover:border-black group-hover:bg-black transition-all duration-500">
+                    <Mail
+                      size={24}
+                      className="text-white group-hover:text-primary"
+                    />
+                  </div>
+                  <span className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] group-hover:text-black transition-colors">
+                    Send_Direct_Signal
+                  </span>
                 </div>
-                <span className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] group-hover:text-black transition-colors">
-                  Send_Direct_Signal
-                </span>
-              </div>
-            </button>
+              </button>
+            </Link>
           </div>
         </div>
       </div>
