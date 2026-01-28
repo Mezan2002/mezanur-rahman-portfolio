@@ -17,7 +17,7 @@ export default function BlogPage() {
         const res = await getBlogs();
         // Filter for published blogs only
         const publishedBlogs = (res.data || []).filter(
-          (blog) => blog.status === "published"
+          (blog) => blog.status === "published",
         );
         setBlogs(publishedBlogs);
       } catch (error) {
@@ -50,7 +50,7 @@ export default function BlogPage() {
             ease: "power3.inOut",
             transformOrigin: "left",
           },
-          "-=0.5"
+          "-=0.5",
         );
 
         if (blogs.length > 0) {
@@ -74,7 +74,7 @@ export default function BlogPage() {
       ref={containerRef}
       className="bg-dark-background min-h-screen pt-32 pb-20 px-6 md:px-12"
     >
-      <div className="max-w-[1400px] mx-auto">
+      <div>
         {/* HEADER */}
         <div className="mb-32">
           <div className="overflow-hidden">
@@ -132,7 +132,7 @@ export default function BlogPage() {
                 <div className="w-full md:w-2/12 relative">
                   <span className="font-mono text-xs text-gray-500 group-hover:text-primary transition-colors block mb-2">
                     {new Date(
-                      blog.publishedAt || blog.createdAt
+                      blog.publishedAt || blog.createdAt,
                     ).toLocaleDateString("en-US", {
                       month: "short",
                       day: "2-digit",

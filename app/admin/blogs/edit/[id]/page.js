@@ -1,6 +1,7 @@
 "use client";
 
 import BlogForm from "@/components/admin/BlogForm";
+import Toast from "@/components/admin/Toast";
 import { getBlogById, getBlogs, updateBlog } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -14,6 +15,17 @@ export default function EditBlogPage() {
   const [blog, setBlog] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Toast State
+  const [toast, setToast] = useState({
+    isVisible: false,
+    message: "",
+    type: "success",
+  });
+
+  const showToast = (message, type = "success") => {
+    setToast({ isVisible: true, message, type });
+  };
 
   useEffect(() => {
     const fetchBlog = async () => {
@@ -46,8 +58,16 @@ export default function EditBlogPage() {
   }, [id]);
 
   const handleUpdate = async (data) => {
-    await updateBlog(id, data);
-    router.push("/admin/blogs");
+    try {
+      await updateBlog(id, data);
+      showToast("Blog post updated successfully!");
+
+      setTimeout(() => {
+        router.push("/admin/blogs");
+      }, 2000);
+    } catch (err) {
+      showToast("Failed to update blog post.", "error");
+    }
   };
 
   if (isLoading) {
@@ -76,7 +96,13 @@ export default function EditBlogPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div>
+      <Toast
+        isVisible={toast.isVisible}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
+      />
       <BlogForm initialData={blog} isEditing={true} onSubmit={handleUpdate} />
     </div>
   );

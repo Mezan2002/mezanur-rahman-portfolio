@@ -149,7 +149,7 @@ export default function AboutPage() {
 
       {/* 3. PREMIUM SKILLS GRID */}
       <section className="py-24 px-6 md:px-12 bg-white/2">
-        <div className="max-w-[1400px] mx-auto">
+        <div>
           <div className="mb-20 flex flex-col md:flex-row justify-between items-end gap-6">
             <div>
               <h2 className="reveal-text text-5xl md:text-7xl font-black font-syne text-white uppercase tracking-tighter mb-4">
@@ -213,11 +213,11 @@ export default function AboutPage() {
       </section>
 
       {/* 4. REWARDS & RECOGNITION */}
-      <section className="py-24 px-6 md:px-12 relative overflow-hidden">
+      <section className="py-40 px-6 md:px-12 relative overflow-hidden">
         {/* Background Accents */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
 
-        <div className="max-w-[1200px] mx-auto relative z-10">
+        <div className="relative z-10">
           <div className="mb-16 text-center md:text-left">
             <h2 className="reveal-text text-4xl md:text-6xl font-bold font-syne text-white uppercase tracking-tight">
               {recognition.title || "Recognition"}
@@ -263,7 +263,7 @@ export default function AboutPage() {
       </section>
 
       {/* 5. EXPERIENCE LIST */}
-      <section className="py-24 px-6 md:px-12 max-w-[1000px] mx-auto">
+      <section className="py-24 px-6 md:px-12">
         <h2 className="reveal-text text-4xl md:text-5xl font-bold font-syne text-white uppercase mb-16 text-center">
           {experience.title || "Career"}
         </h2>

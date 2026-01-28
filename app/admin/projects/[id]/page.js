@@ -1,6 +1,7 @@
 "use client";
 
 import ConfirmationModal from "@/components/admin/ConfirmationModal";
+import Toast from "@/components/admin/Toast";
 import { deleteProject, getProjectById } from "@/lib/api";
 import gsap from "gsap";
 import parse from "html-react-parser";
@@ -28,6 +29,17 @@ export default function ProjectPreviewPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false });
+
+  // Toast State
+  const [toast, setToast] = useState({
+    isVisible: false,
+    message: "",
+    type: "success",
+  });
+
+  const showToast = (message, type = "success") => {
+    setToast({ isVisible: true, message, type });
+  };
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -63,9 +75,13 @@ export default function ProjectPreviewPage() {
   const handleDelete = async () => {
     try {
       await deleteProject(id);
-      router.push("/admin/projects");
+      showToast("Project deleted successfully!");
+
+      setTimeout(() => {
+        router.push("/admin/projects");
+      }, 1500);
     } catch (err) {
-      alert("Failed to delete project: " + err.message);
+      showToast("Failed to delete project: " + err.message, "error");
     }
   };
 
@@ -98,6 +114,12 @@ export default function ProjectPreviewPage() {
 
   return (
     <div ref={containerRef} className="pb-40">
+      <Toast
+        isVisible={toast.isVisible}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
+      />
       {/* Top Navigation & Actions */}
       <div className="flex justify-between items-center mb-16 animate-enter sticky top-8 z-50">
         <button

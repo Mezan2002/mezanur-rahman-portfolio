@@ -1,6 +1,7 @@
 "use client";
 
 import ServiceForm from "@/components/admin/ServiceForm";
+import Toast from "@/components/admin/Toast";
 import { getServiceById, getServices, updateService } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -14,6 +15,17 @@ export default function EditServicePage() {
   const [service, setService] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Toast State
+  const [toast, setToast] = useState({
+    isVisible: false,
+    message: "",
+    type: "success",
+  });
+
+  const showToast = (message, type = "success") => {
+    setToast({ isVisible: true, message, type });
+  };
 
   useEffect(() => {
     const fetchService = async () => {
@@ -53,8 +65,16 @@ export default function EditServicePage() {
   }, [id]);
 
   const handleUpdate = async (data) => {
-    await updateService(id, data);
-    router.push("/admin/services");
+    try {
+      await updateService(id, data);
+      showToast("Service updated successfully!");
+
+      setTimeout(() => {
+        router.push("/admin/services");
+      }, 2000);
+    } catch (err) {
+      showToast("Failed to update service.", "error");
+    }
   };
 
   if (loading) {
@@ -74,7 +94,13 @@ export default function EditServicePage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div>
+      <Toast
+        isVisible={toast.isVisible}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
+      />
       <ServiceForm
         initialData={service}
         isEditing={true}

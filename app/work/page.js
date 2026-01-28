@@ -95,7 +95,7 @@ export default function WorkPage() {
       ref={containerRef}
       className="bg-dark-background min-h-screen pt-32 pb-20 px-6 md:px-12"
     >
-      <div className="max-w-[1600px] mx-auto">
+      <div>
         {/* HEADER */}
         <div className="flex flex-col md:flex-row justify-between items-end mb-24 border-b border-white/10 pb-8">
           <div>
@@ -213,9 +213,9 @@ export default function WorkPage() {
                         className="text-4xl md:text-6xl font-bold text-white group-hover:text-transparent group-hover:stroke-white transition-all duration-300 font-syne uppercase"
                         style={{ WebkitTextStroke: "1px transparent" }}
                       >
-                        <h5 className="group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-white/10 transition-all group-hover:blur-[1px] line-clamp-1">
+                        <span className="group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-white/10 transition-all group-hover:blur-[1px] line-clamp-1">
                           {project.title}
-                        </h5>
+                        </span>
                       </h3>
                       <p className="text-gray-500 text-lg font-light group-hover:text-white delay-75 line-clamp-1 mt-2 transition-transform duration-300">
                         {project.subtitle || "Selected Works"}

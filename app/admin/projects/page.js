@@ -1,6 +1,7 @@
 "use client";
 
 import ConfirmationModal from "@/components/admin/ConfirmationModal";
+import Toast from "@/components/admin/Toast";
 import { deleteProject, getProjects } from "@/lib/api";
 import gsap from "gsap";
 import { Pencil, Plus, Trash2 } from "lucide-react";
@@ -19,6 +20,17 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Toast State
+  const [toast, setToast] = useState({
+    isVisible: false,
+    message: "",
+    type: "success",
+  });
+
+  const showToast = (message, type = "success") => {
+    setToast({ isVisible: true, message, type });
+  };
 
   const fetchProjects = async () => {
     try {
@@ -48,8 +60,9 @@ export default function ProjectsPage() {
         projects.filter((project) => (project._id || project.id) !== id),
       );
       setDeleteModal({ isOpen: false, id: null });
+      showToast("Project deleted successfully!");
     } catch (err) {
-      alert("Failed to delete project: " + err.message);
+      showToast("Failed to delete project: " + err.message, "error");
     }
   };
 
@@ -114,10 +127,13 @@ export default function ProjectsPage() {
   }, [loading, projects, filter]);
 
   return (
-    <div
-      ref={containerRef}
-      className="bg-dark-background min-h-screen pb-20 px-6 md:px-12 pt-10"
-    >
+    <div ref={containerRef} className="bg-dark-background min-h-screen pt-12">
+      <Toast
+        isVisible={toast.isVisible}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
+      />
       <div className="max-w-[1600px] mx-auto">
         {/* HEADER */}
         <div className="flex flex-col md:flex-row justify-between items-end mb-24 border-b border-white/10 pb-8">

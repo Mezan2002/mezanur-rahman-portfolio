@@ -101,7 +101,7 @@ export default function BlogPreviewPage() {
     <div ref={containerRef} className="min-h-screen">
       {/* Refined Header */}
       <header className="border-b border-white/5 py-8 mb-16 animate-enter">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
+        <div className="flex items-center justify-between">
           <button
             onClick={() => router.back()}
             className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors group"
@@ -137,7 +137,7 @@ export default function BlogPreviewPage() {
       </header>
 
       {/* Article Header */}
-      <article className="max-w-5xl mx-auto space-y-16">
+      <article className="space-y-16">
         {/* Meta & Title */}
         <div className="space-y-8 animate-enter">
           {/* Meta Information */}
@@ -146,7 +146,7 @@ export default function BlogPreviewPage() {
               <Calendar size={16} />
               <time className="uppercase tracking-wide">
                 {new Date(
-                  blog.publishedAt || blog.createdAt || Date.now()
+                  blog.publishedAt || blog.createdAt || Date.now(),
                 ).toLocaleDateString("en-US", {
                   month: "long",
                   day: "numeric",
@@ -210,13 +210,13 @@ export default function BlogPreviewPage() {
         </figure>
 
         {/* Article Content */}
-        <div className="max-w-3xl mx-auto prose prose-invert prose-lg md:prose-xl animate-enter selection:bg-primary/30 prose-headings:font-syne prose-headings:font-black prose-headings:tracking-tight prose-p:text-gray-300 prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-white prose-code:text-primary prose-code:bg-white/5 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-pre:bg-white/5 prose-pre:border prose-pre:border-white/10">
+        <div className="prose prose-invert prose-lg md:prose-xl animate-enter selection:bg-primary/30 prose-headings:font-syne prose-headings:font-black prose-headings:tracking-tight prose-p:text-gray-300 prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-white prose-code:text-primary prose-code:bg-white/5 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-pre:bg-white/5 prose-pre:border prose-pre:border-white/10">
           {parse(blog.content || "")}
         </div>
 
         {/* Tags */}
         {blog.tags && blog.tags.length > 0 && (
-          <div className="max-w-3xl mx-auto pt-12 border-t border-white/5 animate-enter">
+          <div className="pt-12 border-t border-white/5 animate-enter">
             <div className="flex items-start gap-6">
               <span className="text-sm text-gray-500 uppercase tracking-wider font-medium pt-2">
                 Tagged

@@ -162,7 +162,7 @@ export default function Projects({ data = {} }) {
                     <div className="parallax-img absolute inset-0 w-full h-[120%] top-[-10%]">
                       <Image
                         src={
-                          project.image ||
+                          project.thumbnail ||
                           "https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?auto=format&fit=crop&q=80&w=1600"
                         }
                         alt={project.title}
@@ -189,10 +189,10 @@ export default function Projects({ data = {} }) {
                   {/* Sub-Card Content */}
                   <div className="mt-10 flex flex-col space-y-4">
                     <div className="flex justify-between items-start">
-                      <h3 className="text-4xl md:text-5xl font-black font-syne text-white uppercase tracking-tighter group-hover:text-primary transition-colors duration-500">
+                      <h3 className="text-4xl md:text-5xl font-black font-syne text-white uppercase tracking-tighter group-hover:text-primary transition-colors duration-500 line-clamp-2">
                         {project.title}
                       </h3>
-                      <span className="font-mono text-[10px] text-gray-500 italic mt-2">
+                      <span className="font-mono text-[10px] text-gray-500 italic mt-2 shrink-0">
                         {project.year || "2024"}
                       </span>
                     </div>

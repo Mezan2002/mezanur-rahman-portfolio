@@ -14,14 +14,15 @@
 }
 
 /* Base Styles */
-html {
+html,
+body {
   overflow-x: hidden;
+  position: relative;
 }
 
 body {
   background: #050505;
   color: #ffffff;
-  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -480,4 +481,22 @@ section {
   margin-bottom: 1.5rem;
   line-height: 1.8;
   color: rgba(255, 255, 255, 0.7);
+}
+
+/* Scroll Utilities */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-snap-x {
+  scroll-snap-type: x mandatory;
+}
+
+.scroll-snap-align-center {
+  scroll-snap-align: center;
 }

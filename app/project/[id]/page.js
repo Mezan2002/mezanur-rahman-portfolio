@@ -1,6 +1,7 @@
 "use client";
 
 import { getProjectById } from "@/lib/api";
+import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import parse from "html-react-parser";
@@ -39,10 +40,10 @@ export default function ProjectDetails() {
     fetchProject();
   }, [id]);
 
-  useEffect(() => {
-    if (!project || loading) return;
+  useGSAP(
+    () => {
+      if (!project || loading) return;
 
-    const ctx = gsap.context(() => {
       const tl = gsap.timeline();
 
       tl.from(".reveal-text", {
@@ -77,12 +78,12 @@ export default function ProjectDetails() {
         });
       });
 
-      // Gallery Reveal Animation
-      gsap.utils.toArray(".gallery-item").forEach((item, i) => {
+      // Staggered Grid Animations
+      gsap.utils.toArray(".grid-gallery-item").forEach((item, i) => {
+        // Entrance Reveal
         gsap.from(item, {
           y: 60,
           opacity: 0,
-          scale: 0.95,
           duration: 1.2,
           ease: "power3.out",
           scrollTrigger: {
@@ -91,11 +92,39 @@ export default function ProjectDetails() {
             toggleActions: "play none none reverse",
           },
         });
-      });
-    }, containerRef);
 
-    return () => ctx.revert();
-  }, [project, loading]);
+        // Subtile Image Parallax
+        const img = item.querySelector("img");
+        if (img) {
+          gsap.to(img, {
+            yPercent: 10,
+            ease: "none",
+            scrollTrigger: {
+              trigger: item,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: true,
+            },
+          });
+        }
+      });
+
+      // Column Parallax (makes the staggered effect more dynamic)
+      if (window.innerWidth > 768) {
+        gsap.to(".gallery-column-2", {
+          y: -100,
+          ease: "none",
+          scrollTrigger: {
+            trigger: ".grid-gallery-container",
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true,
+          },
+        });
+      }
+    },
+    { scope: containerRef, dependencies: [project, loading] },
+  );
 
   // Loading state
   if (loading) {
@@ -113,7 +142,7 @@ export default function ProjectDetails() {
   if (error || !project) {
     return (
       <main className="bg-dark-background min-h-screen text-white pt-32 pb-20">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="px-6 md:px-12">
           <Link
             href="/work"
             className="flex items-center gap-2 text-white hover:text-gray-400 transition-colors uppercase tracking-widest text-sm font-bold mb-8"
@@ -148,9 +177,9 @@ export default function ProjectDetails() {
   return (
     <main
       ref={containerRef}
-      className="bg-dark-background min-h-screen text-white pt-32 pb-20"
+      className="bg-dark-background min-h-screen text-white pt-28 pb-20"
     >
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="px-6 md:px-12">
         {/* Navigation Breadcrumb */}
         <div className="flex items-center gap-4 mb-16 reveal-text">
           <Link
@@ -197,7 +226,7 @@ export default function ProjectDetails() {
               </span>
             </div>
             <div>
-              <span className="block text-gray-600 text-[10px] uppercase tracking-widest mb-4 font-mono">
+              <span className="block text-gray-600 text-xs uppercase tracking-widest mb-4 font-mono">
                 Category
               </span>
               <div className="flex flex-wrap gap-2">
@@ -250,14 +279,14 @@ export default function ProjectDetails() {
         </div>
 
         {/* Hero Image (Thumbnail) */}
-        <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-24 reveal-image border border-white/10">
+        <div className="relative w-full h-full rounded-xl overflow-hidden mb-24 reveal-image">
           <Image
             src={thumbnail}
             alt={project.title}
-            fill
+            width={1920}
+            height={1080}
             className="object-cover"
             priority
-            unoptimized
           />
         </div>
 
@@ -354,54 +383,74 @@ export default function ProjectDetails() {
           </div>
         </div>
 
-        {/* Gallery */}
+        {/* Staggered 2-Column Gallery */}
         {gallery.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-6 md:gap-8 mb-32 w-full">
-            {gallery.map((image, idx) => {
-              // Create an asymmetrical editorial layout pattern
-              let colSpan = "md:col-span-3"; // Default: half width
-              let aspectRatio = "aspect-[4/3]";
+          <div className="grid-gallery-container grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 mb-32 relative">
+            {/* Column 1 */}
+            <div className="gallery-column-1 space-y-8 md:space-y-12">
+              {gallery
+                .filter((_, i) => i % 2 === 0)
+                .map((image, idx) => (
+                  <div
+                    key={`col1-${idx}`}
+                    className="grid-gallery-item relative group"
+                  >
+                    <div className="aspect-4/5 overflow-hidden rounded-sm bg-white/5 relative">
+                      <Image
+                        src={image}
+                        alt={`${project.title} - Plate ${idx * 2 + 1}`}
+                        fill
+                        className="object-cover scale-110 will-change-transform"
+                        unoptimized
+                      />
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-700"></div>
+                    </div>
 
-              if (idx % 3 === 0) {
-                colSpan = "md:col-span-4"; // Wider
-                aspectRatio = "aspect-video";
-              } else if (idx % 3 === 1) {
-                colSpan = "md:col-span-2"; // Narrower
-                aspectRatio = "aspect-square";
-              } else {
-                colSpan = "md:col-span-6"; // Full width
-                aspectRatio = "aspect-[21/9]";
-              }
-
-              return (
-                <div
-                  key={idx}
-                  className={`gallery-item group relative ${aspectRatio} ${colSpan} w-full overflow-hidden bg-white/5 border border-white/5 hover:border-white/20 transition-all duration-700 rounded-2xl`}
-                >
-                  {/* Image with Premium Zoom and Grayscale Transition */}
-                  <Image
-                    src={image}
-                    alt={`${project.title} - Gallery ${idx + 1}`}
-                    fill
-                    className="parallax-image object-cover transition-transform duration-1000 ease-out group-hover:scale-105 grayscale-[0.3] group-hover:grayscale-0"
-                    unoptimized
-                  />
-
-                  {/* Subtle Overlay for Depth */}
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-700 pointer-events-none"></div>
-
-                  {/* Glassmorphic View Indicator */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 transform scale-90 group-hover:scale-100">
-                    <div className="px-6 py-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full shadow-2xl flex items-center gap-2">
-                      <ExternalLink size={14} className="text-white" />
-                      <span className="text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-white">
-                        Full View
+                    {/* Subtle Label */}
+                    <div className="mt-4 flex justify-between items-end opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                      <span className="text-[10px] font-mono text-primary uppercase tracking-widest">
+                        Plate A-{String(idx * 2 + 1).padStart(2, "0")}
+                      </span>
+                      <span className="text-[8px] font-mono text-gray-600 uppercase">
+                        Archive Ref. Project_{id?.slice(-4)}
                       </span>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                ))}
+            </div>
+
+            {/* Column 2 (Staggered/Offset Downwards) */}
+            <div className="gallery-column-2 space-y-8 md:space-y-12 md:mt-32">
+              {gallery
+                .filter((_, i) => i % 2 !== 0)
+                .map((image, idx) => (
+                  <div
+                    key={`col2-${idx}`}
+                    className="grid-gallery-item relative group"
+                  >
+                    <div className="aspect-4/5 overflow-hidden rounded-sm bg-white/5 relative">
+                      <Image
+                        src={image}
+                        alt={`${project.title} - Plate ${idx * 2 + 2}`}
+                        fill
+                        className="object-cover scale-110 will-change-transform"
+                        unoptimized
+                      />
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-700"></div>
+                    </div>
+
+                    {/* Subtle Label */}
+                    <div className="mt-4 flex justify-between items-end opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                      <span className="text-[10px] font-mono text-primary uppercase tracking-widest">
+                        Plate A-{String(idx * 2 + 2).padStart(2, "0")}
+                      </span>
+                      <span className="text-[8px] font-mono text-gray-600 uppercase">
+                        Archive Ref. Project_{id?.slice(-4)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+            </div>
           </div>
         )}
 

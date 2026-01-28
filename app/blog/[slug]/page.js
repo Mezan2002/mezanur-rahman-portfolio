@@ -32,7 +32,7 @@ export default function BlogDetails() {
             const allBlogs = allBlogsRes.data || [];
             // Try finding by ID first, then by actual slug if we implement that later
             blogData = allBlogs.find(
-              (b) => (b._id || b.id) === id || b.slug === id
+              (b) => (b._id || b.id) === id || b.slug === id,
             );
           } catch (fallbackErr) {
             console.error("Fallback fetch failed", fallbackErr);
@@ -111,7 +111,7 @@ export default function BlogDetails() {
         </Link>
       </div>
 
-      <article className="max-w-4xl mx-auto px-4">
+      <article className="px-6 md:px-12">
         {/* Header */}
         <header className="mb-16 text-center blog-reveal">
           <div className="flex justify-center gap-6 text-sm text-gray-500 uppercase tracking-widest mb-6">
@@ -123,7 +123,7 @@ export default function BlogDetails() {
                   month: "long",
                   day: "numeric",
                   year: "numeric",
-                }
+                },
               )}
             </span>
             {blog.readTime && (

@@ -1,6 +1,7 @@
 "use client";
 
 import ProjectForm from "@/components/admin/ProjectForm";
+import Toast from "@/components/admin/Toast";
 import { getProjectById, updateProject } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -12,6 +13,17 @@ export default function EditProjectPage() {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Toast State
+  const [toast, setToast] = useState({
+    isVisible: false,
+    message: "",
+    type: "success",
+  });
+
+  const showToast = (message, type = "success") => {
+    setToast({ isVisible: true, message, type });
+  };
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -35,9 +47,15 @@ export default function EditProjectPage() {
   const handleUpdate = async (data) => {
     try {
       await updateProject(id, data);
-      router.push("/admin/projects");
+      showToast("Project updated successfully!");
+
+      // Delay redirect to let user see the toast
+      setTimeout(() => {
+        router.push("/admin/projects");
+      }, 2000);
     } catch (err) {
       console.error("Failed to update project:", err);
+      showToast("Failed to update project.", "error");
       throw err;
     }
   };
@@ -68,7 +86,13 @@ export default function EditProjectPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div>
+      <Toast
+        isVisible={toast.isVisible}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
+      />
       <ProjectForm
         initialData={project}
         isEditing={true}

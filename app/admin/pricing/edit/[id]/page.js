@@ -1,6 +1,7 @@
 "use client";
 
 import PricingForm from "@/components/admin/PricingForm";
+import Toast from "@/components/admin/Toast";
 import { getPricing, updatePricing } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -14,6 +15,17 @@ export default function EditPricingPage() {
   const [plan, setPlan] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Toast State
+  const [toast, setToast] = useState({
+    isVisible: false,
+    message: "",
+    type: "success",
+  });
+
+  const showToast = (message, type = "success") => {
+    setToast({ isVisible: true, message, type });
+  };
 
   useEffect(() => {
     const fetchPlan = async () => {
@@ -42,8 +54,16 @@ export default function EditPricingPage() {
   }, [id]);
 
   const handleUpdate = async (data) => {
-    await updatePricing(id, data);
-    router.push("/admin/pricing");
+    try {
+      await updatePricing(id, data);
+      showToast("Pricing plan updated successfully!");
+
+      setTimeout(() => {
+        router.push("/admin/pricing");
+      }, 2000);
+    } catch (err) {
+      showToast("Failed to update pricing plan.", "error");
+    }
   };
 
   if (isLoading) {
@@ -75,7 +95,13 @@ export default function EditPricingPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div>
+      <Toast
+        isVisible={toast.isVisible}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
+      />
       <PricingForm
         initialData={plan}
         isEditing={true}

@@ -165,7 +165,7 @@ export default function ContactPage() {
       <div className="absolute top-0 right-0 w-[60vw] h-[60vh] bg-primary/5 rounded-full blur-[120px] pointer-events-none translate-x-1/4 -translate-y-1/4"></div>
       <div className="absolute bottom-0 left-0 w-[40vw] h-[40vh] bg-blue-500/5 rounded-full blur-[100px] pointer-events-none -translate-x-1/4 translate-y-1/4"></div>
 
-      <div className="max-w-[1600px] mx-auto px-6 md:px-12 relative z-10">
+      <div className="px-6 md:px-12 relative z-10">
         {/* HEADER SECTION */}
         <div className="mb-24 flex flex-col items-start leading-[0.9]">
           <div>

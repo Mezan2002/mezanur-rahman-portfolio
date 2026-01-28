@@ -1,6 +1,7 @@
 "use client";
 
 import TestimonialForm from "@/components/admin/TestimonialForm";
+import Toast from "@/components/admin/Toast";
 import { getTestimonialById, updateTestimonial } from "@/lib/api";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -10,6 +11,17 @@ export default function EditTestimonialPage() {
   const { id } = useParams();
   const [initialData, setInitialData] = useState({});
   const [loading, setLoading] = useState(true);
+
+  // Toast State
+  const [toast, setToast] = useState({
+    isVisible: false,
+    message: "",
+    type: "success",
+  });
+
+  const showToast = (message, type = "success") => {
+    setToast({ isVisible: true, message, type });
+  };
 
   useEffect(() => {
     const fetchTestimonial = async () => {
@@ -33,9 +45,13 @@ export default function EditTestimonialPage() {
   const handleUpdate = async (data) => {
     try {
       await updateTestimonial(id, data);
-      router.push("/admin/testimonials");
+      showToast("Testimonial updated successfully!");
+
+      setTimeout(() => {
+        router.push("/admin/testimonials");
+      }, 2000);
     } catch (error) {
-      throw error;
+      showToast("Failed to update testimonial.", "error");
     }
   };
 
@@ -48,10 +64,18 @@ export default function EditTestimonialPage() {
   }
 
   return (
-    <TestimonialForm
-      initialData={initialData}
-      isEditing={true}
-      onSubmit={handleUpdate}
-    />
+    <div>
+      <Toast
+        isVisible={toast.isVisible}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
+      />
+      <TestimonialForm
+        initialData={initialData}
+        isEditing={true}
+        onSubmit={handleUpdate}
+      />
+    </div>
   );
 }
