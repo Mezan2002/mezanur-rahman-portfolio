@@ -25,7 +25,6 @@ const sidebarLinks = [
   { name: "Categories", href: "/admin/categories", icon: Disc },
   { name: "Content", href: "/admin/content", icon: LayoutDashboard },
   { name: "Testimonials", href: "/admin/testimonials", icon: FileText },
-  // { name: "Users", href: "/admin/users", icon: Users },
   { name: "Skills", href: "/admin/skills", icon: Wrench },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
@@ -89,7 +88,7 @@ export default function AdminSidebar() {
           pointerEvents: "all",
           duration: 0.3,
           ease: "power2.out",
-        }
+        },
       );
     } else {
       gsap.to(modalRef.current, {
