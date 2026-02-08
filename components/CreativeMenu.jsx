@@ -38,7 +38,7 @@ export default function CreativeMenu({ isOpen, onClose }) {
           stagger: 0.1,
           ease: "power3.out",
         },
-        "-=0.4"
+        "-=0.4",
       );
     } else {
       document.body.style.overflow = "";
@@ -108,7 +108,7 @@ export default function CreativeMenu({ isOpen, onClose }) {
               <Link
                 href={link.href}
                 onClick={onClose}
-                className="menu-link block text-[10vh] md:text-[6vw] font-black uppercase text-white font-syne leading-none hover:text-stroke-white transition-all duration-300 py-1"
+                className="menu-link block text-3xl lg:text-[10vh] md:text-[6vw] font-black uppercase text-white font-syne leading-none hover:text-stroke-white transition-all duration-300 py-1"
               >
                 {link.name}
               </Link>

@@ -108,12 +108,12 @@ export default function Projects({ data = {} }) {
         <div className="header-fade-in mb-32 md:mb-48 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-12">
           <div className="space-y-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-px bg-primary/40"></div>
-              <p className="text-gray-500 uppercase tracking-[0.4em] text-[10px] font-mono">
+              <div className="w-4 lg:w-12 h-px bg-primary/40"></div>
+              <p className="text-gray-500 uppercase tracking-[0.4em] lg:text-[10px] text-[9px] font-mono">
                 {data?.tag || "Select Works // 2023 - 2026"}
               </p>
             </div>
-            <h2 className="text-7xl md:text-9xl font-black font-syne text-white uppercase leading-[0.8] tracking-tighter">
+            <h2 className="text-5xl md:text-9xl font-black font-syne text-white uppercase leading-[0.8] tracking-tighter">
               {titleLines[0]}
               <br />
               <span className="text-primary italic">
@@ -149,7 +149,7 @@ export default function Projects({ data = {} }) {
             projects.map((project, index) => (
               <div
                 key={project._id || project.id}
-                className={`project-grid-item group relative ${
+                className={`project-grid-item mt-5 lg:mt-0 group relative ${
                   index % 2 !== 0 ? "md:mt-20" : ""
                 }`}
               >
@@ -158,7 +158,7 @@ export default function Projects({ data = {} }) {
                   className="relative block w-full overflow-hidden"
                 >
                   {/* Image Window */}
-                  <div className="relative aspect-4/3 overflow-hidden bg-white/5 rounded-sm grayscale group-hover:grayscale-0 transition-all duration-[1.5s] ease-expo">
+                  <div className="relative aspect-4/3 overflow-hidden bg-white/5 grayscale group-hover:grayscale-0 transition-all duration-[1.5s] ease-expo">
                     <div className="parallax-img absolute inset-0 w-full h-[120%] top-[-10%]">
                       <Image
                         src={
@@ -172,7 +172,7 @@ export default function Projects({ data = {} }) {
                     </div>
 
                     {/* Discrete Corner Detail */}
-                    <div className="absolute top-8 left-8 z-10">
+                    <div className="absolute top-4 left-4 lg:top-8 lg:left-8 z-10">
                       <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest bg-black/40 backdrop-blur-md px-3 py-1 border border-white/5 rounded-full">
                         {String(index + 1).padStart(2, "0")}
                       </span>
@@ -180,16 +180,16 @@ export default function Projects({ data = {} }) {
 
                     {/* Hover Action Overlay */}
                     <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-700 backdrop-blur-[2px]">
-                      <div className="w-20 h-20 rounded-full border border-white/20 flex items-center justify-center text-white scale-50 group-hover:scale-100 transition-all duration-700 ease-expo">
-                        <ArrowUpRight size={32} />
+                      <div className="w-14 h-14 md:w-20 md:h-20 rounded-full border border-white/20 flex items-center justify-center text-white scale-50 group-hover:scale-100 transition-all duration-700 ease-expo">
+                        <ArrowUpRight className="size-6 md:size-8" />
                       </div>
                     </div>
                   </div>
 
                   {/* Sub-Card Content */}
-                  <div className="mt-10 flex flex-col space-y-4">
-                    <div className="flex justify-between items-start">
-                      <h3 className="text-4xl md:text-5xl font-black font-syne text-white uppercase tracking-tighter group-hover:text-primary transition-colors duration-500 line-clamp-2">
+                  <div className="mt-6 md:mt-10 flex flex-col space-y-4">
+                    <div className="lg:flex justify-between items-start">
+                      <h3 className="text-2xl sm:text-3xl md:text-5xl font-black font-syne text-white uppercase tracking-tighter group-hover:text-primary transition-colors duration-500 line-clamp-2">
                         {project.title}
                       </h3>
                       <span className="font-mono text-[10px] text-gray-500 italic mt-2 shrink-0">
@@ -199,16 +199,16 @@ export default function Projects({ data = {} }) {
 
                     <div className="h-px w-full bg-white/5 group-hover:bg-primary/20 transition-colors duration-1000"></div>
 
-                    <div className="flex justify-between">
-                      <p className="text-xs font-mono text-gray-500 uppercase tracking-widest">
+                    <div className="flex justify-between items-center gap-4">
+                      <p className="text-[10px] md:text-xs font-mono text-gray-500 uppercase tracking-widest truncate">
                         {Array.isArray(project.category)
                           ? project.category.join(", ")
                           : project.category ||
                             project.subtitle ||
                             "Digital Product"}
                       </p>
-                      <div className="overflow-hidden">
-                        <span className="block text-[10px] font-mono text-primary uppercase translate-y-full group-hover:translate-y-0 transition-transform duration-500">
+                      <div className="overflow-hidden shrink-0">
+                        <span className="block text-[10px] font-mono text-primary uppercase md:translate-y-full md:group-hover:translate-y-0 transition-transform duration-500">
                           Explore Archive
                         </span>
                       </div>
@@ -221,12 +221,12 @@ export default function Projects({ data = {} }) {
         </div>
 
         {/* Foot CTA */}
-        <div className="mt-48 flex flex-col items-center">
+        <div className="mt-24 md:mt-48 flex flex-col items-center">
           <Link
             href="/work"
-            className="group relative flex flex-col items-center gap-6"
+            className="group relative flex flex-col items-center gap-6 text-center"
           >
-            <span className="text-sm font-bold font-syne text-white uppercase tracking-[0.6em] group-hover:text-primary transition-colors">
+            <span className="text-[10px] md:text-sm font-bold font-syne text-white uppercase tracking-[0.3em] md:tracking-[0.6em] group-hover:text-primary transition-colors">
               Explore All Projects
             </span>
             <div className="w-24 h-px bg-white/10 relative overflow-hidden">

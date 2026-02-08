@@ -30,8 +30,8 @@ export default function Pricing({ data = {} }) {
               plan.price === "Custom"
                 ? plan.price
                 : plan.price
-                ? `$${plan.price}`
-                : "Custom",
+                  ? `$${plan.price}`
+                  : "Custom",
             description: plan.description,
             features: plan.features || [],
             cta: plan.recommended ? "Recommended" : "Start Project",
@@ -96,12 +96,12 @@ export default function Pricing({ data = {} }) {
           return () =>
             window.removeEventListener(
               "page-transition-complete",
-              runAnimations
+              runAnimations,
             );
         }
       }
     },
-    { scope: sectionRef, dependencies: [loading, tiers] }
+    { scope: sectionRef, dependencies: [loading, tiers] },
   );
 
   if (loading) {
@@ -137,7 +137,7 @@ export default function Pricing({ data = {} }) {
           {tiers.map((tier) => (
             <div
               key={tier.id}
-              className={`pricing-card group relative p-10 flex flex-col justify-between transition-all duration-700 h-full ${
+              className={`pricing-card group relative p-4 lg:p-10 flex flex-col justify-between transition-all duration-700 h-full ${
                 tier.popular
                   ? "bg-white/5 border border-primary/30 shadow-[0_0_80px_-20px_rgba(var(--primary-rgb),0.15)]"
                   : "bg-white/1 border border-white/5 hover:border-white/10"
@@ -156,7 +156,7 @@ export default function Pricing({ data = {} }) {
                     {tier.name}
                   </h3>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-5xl font-black font-syne text-white">
+                    <span className="text-3xl lg:text-5xl font-black font-syne text-white">
                       {tier.price}
                     </span>
                     {tier.price !== "Custom" && (
@@ -187,7 +187,7 @@ export default function Pricing({ data = {} }) {
 
               <div className="mt-12">
                 <button
-                  className={`w-full py-5 font-black font-syne uppercase tracking-widest text-sm transition-all duration-500 relative overflow-hidden active:scale-95 ${
+                  className={`w-full py-3 lg:py-5 font-black font-syne uppercase tracking-widest text-xs lg:text-sm transition-all duration-500 relative overflow-hidden active:scale-95 ${
                     tier.popular
                       ? "bg-primary text-black hover:bg-white"
                       : "bg-white/5 text-white hover:bg-white hover:text-black border border-white/10"

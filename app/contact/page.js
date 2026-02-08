@@ -191,7 +191,7 @@ export default function ContactPage() {
         {/* MAIN GRID LAYOUT */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-px bg-white/10 border border-white/10 content-reveal">
           {/* LEFT COLUMN: Contact Info */}
-          <div className="md:col-span-5 bg-dark-background p-8 md:p-16 flex flex-col justify-between group transition-colors relative overflow-hidden">
+          <div className="md:col-span-5 bg-dark-background px-4 py-8 md:p-16 flex flex-col justify-between group transition-colors relative overflow-hidden">
             <div className="relative z-10">
               <span className="text-sm font-mono text-gray-500 uppercase tracking-widest block mb-8">
                 Contact Details
@@ -200,7 +200,7 @@ export default function ContactPage() {
               <div className="mb-16">
                 <a
                   href={`mailto:${settings?.contactEmail || "hello@mezanur.com"}`}
-                  className="block text-4xl md:text-5xl font-black font-syne text-white transition-all duration-300 break-all"
+                  className="block text-xl md:text-5xl font-black font-syne text-white transition-all duration-300 break-all"
                   style={{ WebkitTextStroke: "1px transparent" }}
                 >
                   <span className="transition-all">
@@ -242,7 +242,7 @@ export default function ContactPage() {
           </div>
 
           {/* RIGHT COLUMN: Form */}
-          <div className="md:col-span-7 bg-dark-background p-8 md:p-16 group transition-colors relative">
+          <div className="md:col-span-7 bg-dark-background px-4 py-8 md:p-16 group transition-colors relative">
             <span className="text-sm font-mono text-gray-500 uppercase tracking-widest block mb-12">
               Project Inquiry
             </span>
@@ -314,7 +314,7 @@ export default function ContactPage() {
                 <button
                   type="submit"
                   disabled={isSending}
-                  className="w-full md:w-auto px-10 py-5 bg-white text-black font-bold uppercase tracking-widest hover:bg-gray-200 transition-colors flex items-center justify-center gap-3 group/btn disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full md:w-auto px-4 py-3 lg:px-10 lg:py-5 bg-white text-black font-bold uppercase tracking-widest hover:bg-gray-200 transition-colors flex items-center justify-center gap-3 group/btn disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isSending ? (
                     <>

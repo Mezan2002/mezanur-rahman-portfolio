@@ -76,7 +76,7 @@ export default function BlogPage() {
     >
       <div>
         {/* HEADER */}
-        <div className="mb-32">
+        <div className="mb-16 lg:mb-32">
           <div className="overflow-hidden">
             <span className="page-title-char inline-block text-xs font-mono text-primary mb-4 tracking-widest uppercase">
               / The Journal
@@ -159,7 +159,7 @@ export default function BlogPage() {
                   <span className="text-gray-600 text-xs font-mono uppercase tracking-widest hidden md:block">
                     {blog.readTime}
                   </span>
-                  <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-black transition-all duration-500 group-hover:-rotate-45">
+                  <div className="w-full lg:w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-black transition-all duration-500 group-hover:-rotate-45">
                     <ArrowRight size={20} />
                   </div>
                 </div>

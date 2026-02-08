@@ -45,7 +45,7 @@ export default function Testimonials({ data = {} }) {
   const prevSlide = () => {
     if (testimonials.length === 0) return;
     setCurrentIndex(
-      (prev) => (prev - 1 + testimonials.length) % testimonials.length
+      (prev) => (prev - 1 + testimonials.length) % testimonials.length,
     );
   };
 
@@ -57,7 +57,7 @@ export default function Testimonials({ data = {} }) {
       const revealEntrance = () => {
         const cards = gsap.utils.toArray(
           ".testimonial-card",
-          sectionRef.current
+          sectionRef.current,
         );
         if (!cards || cards.length === 0) return;
 
@@ -87,18 +87,18 @@ export default function Testimonials({ data = {} }) {
           revealEntrance();
           window.removeEventListener(
             "page-transition-complete",
-            handleTransition
+            handleTransition,
           );
         };
         window.addEventListener("page-transition-complete", handleTransition);
         return () =>
           window.removeEventListener(
             "page-transition-complete",
-            handleTransition
+            handleTransition,
           );
       }
     },
-    { dependencies: [loading], scope: sectionRef }
+    { dependencies: [loading], scope: sectionRef },
   );
 
   // 2. Slider Interaction (Run on currentIndex change)
@@ -115,7 +115,7 @@ export default function Testimonials({ data = {} }) {
         ease: "power3.out",
       });
     },
-    { dependencies: [currentIndex, testimonials], scope: sectionRef }
+    { dependencies: [currentIndex, testimonials], scope: sectionRef },
   );
 
   return (
@@ -190,7 +190,7 @@ export default function Testimonials({ data = {} }) {
               {testimonials.map((testimonial) => (
                 <div
                   key={testimonial._id || testimonial.id}
-                  className="testimonial-card group shrink-0 w-full md:w-[calc(50%-16px)] lg:w-[calc(33.333%-21.333px)] p-10 bg-white/1 border border-white/5 hover:border-white/10 transition-all duration-500 flex flex-col justify-between h-[450px]"
+                  className="testimonial-card group shrink-0 w-full md:w-[calc(50%-16px)] lg:w-[calc(33.333%-21.333px)] p-6 lg:p-10 bg-white/1 border border-white/5 hover:border-white/10 transition-all duration-500 flex flex-col justify-between h-[450px]"
                 >
                   <div className="relative">
                     <Quote className="w-8 h-8 text-primary/20 mb-6" />
@@ -202,7 +202,7 @@ export default function Testimonials({ data = {} }) {
                             size={12}
                             className="fill-primary text-primary"
                           />
-                        )
+                        ),
                       )}
                     </div>
                     <div className="text-lg text-gray-400 leading-relaxed mb-10 group-hover:text-white transition-colors line-clamp-6">

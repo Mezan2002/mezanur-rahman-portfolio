@@ -99,12 +99,12 @@ export default function Services({ data = {} }) {
           return () =>
             window.removeEventListener(
               "page-transition-complete",
-              runAnimations
+              runAnimations,
             );
         }
       }
     },
-    { scope: sectionRef, dependencies: [loading, services] }
+    { scope: sectionRef, dependencies: [loading, services] },
   );
 
   if (loading) {
@@ -150,7 +150,7 @@ export default function Services({ data = {} }) {
           {services.map((service, index) => (
             <div
               key={service.id}
-              className="service-card bg-dark-background p-10 flex flex-col justify-between group transition-all duration-500 min-h-[450px]"
+              className="service-card bg-dark-background p-4 lg:p-10 flex flex-col justify-between group transition-all duration-500 min-h-[450px]"
             >
               <div className="space-y-8">
                 <div className="flex justify-between items-start">
@@ -162,7 +162,7 @@ export default function Services({ data = {} }) {
                   </span>
                 </div>
                 <div>
-                  <h3 className="text-3xl font-black font-syne text-white uppercase mb-4 tracking-tight group-hover:text-primary transition-colors">
+                  <h3 className="text-2xl lg:text-3xl font-black font-syne text-white uppercase mb-4 tracking-tight group-hover:text-primary transition-colors">
                     {service.title}
                   </h3>
                   <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors">

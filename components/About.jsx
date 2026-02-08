@@ -52,7 +52,7 @@ export default function About({ data = {} }) {
         label: "Optimized",
         icon: "Compass",
         desc: "Optimization is a philosophy. I target 100/100 Lighthouse scores by focusing on critical paths and asset efficiency.",
-      }
+      },
     );
   }
 
@@ -64,7 +64,7 @@ export default function About({ data = {} }) {
           minute: "2-digit",
           second: "2-digit",
           hour12: false,
-        })
+        }),
       );
     };
     updateTime();
@@ -89,7 +89,7 @@ export default function About({ data = {} }) {
               opacity: 0,
               duration: 1,
             },
-            "-=0.8"
+            "-=0.8",
           )
           .from(
             ".about-card",
@@ -99,7 +99,7 @@ export default function About({ data = {} }) {
               stagger: 0.15,
               duration: 1,
             },
-            "-=0.6"
+            "-=0.6",
           );
       };
 
@@ -111,7 +111,7 @@ export default function About({ data = {} }) {
           window.removeEventListener("page-transition-complete", runAnimations);
       }
     },
-    { scope: containerRef }
+    { scope: containerRef },
   );
 
   return (
@@ -124,14 +124,14 @@ export default function About({ data = {} }) {
       <div className="absolute top-0 -left-1/4 w-[40vw] h-[40vw] bg-primary/5 rounded-full blur-[150px] pointer-events-none translate-x-1/4 -translate-y-1/4" />
 
       <div className="relative z-10 space-y-24">
-        <div className="about-header border-b border-white/5 pb-12 flex flex-col md:flex-row justify-between items-end gap-8">
-          <h2 className="text-7xl md:text-8xl font-black uppercase tracking-tighter leading-none">
+        <div className="about-header border-b border-white/5 pb-12 flex flex-col lg:flex-row justify-between lg:items-end gap-8">
+          <h2 className="text-5xl md:text-8xl font-black uppercase tracking-tighter leading-none">
             {data.heading?.[0] || "About"} <br />
             <span className="bg-white text-black">
               {data.heading?.[1] || "Me."}
             </span>
           </h2>
-          <div className="flex items-center gap-4 text-green-600 font-mono text-xs tracking-widest bg-green-500/5 border border-green-500/10 px-6 py-3 rounded-full uppercase">
+          <div className="flex items-center justify-center gap-4 text-green-600 font-mono text-xs tracking-widest bg-green-500/5 border border-green-500/10 px-6 py-3 rounded-full uppercase">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
             {data.availabilityStatus || "Currently Available"}
           </div>
@@ -181,7 +181,7 @@ export default function About({ data = {} }) {
           {pillars.map((pillar) => (
             <div
               key={pillar.id}
-              className="about-card md:bg-dark-background p-10 flex flex-col justify-between min-h-[380px] hover:bg-white/2 transition-colors group"
+              className="about-card md:bg-dark-background p-4 lg:p-10 flex flex-col justify-between min-h-[380px] hover:bg-white/2 transition-colors group border md:border-none border-white/5 rounded-3xl md:rounded-none"
             >
               <div className="space-y-6">
                 <div className="w-14 h-14 rounded-2xl bg-white/3 border border-white/10 flex items-center justify-center text-white group-hover:border-primary/50 transition-colors">
@@ -214,7 +214,7 @@ export default function About({ data = {} }) {
             </div>
           </div>
 
-          <button className="group relative px-12 py-5 bg-white text-black font-bold uppercase tracking-widest text-xs rounded-full overflow-hidden hover:pr-16 transition-all duration-500">
+          <button className="group relative px-12 py-5 bg-white text-black font-bold uppercase tracking-widest text-xs rounded-full overflow-hidden hover:pr-16 transition-all duration-500 w-full md:w-auto">
             <span className="relative z-10 transition-transform group-hover:-translate-x-2 inline-block">
               Work with me
             </span>

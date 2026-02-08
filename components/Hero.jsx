@@ -54,12 +54,12 @@ export default function Hero({ data = {} }) {
               duration: 1,
               ease: "back.out(1.7)",
             },
-            "-=0.8"
+            "-=0.8",
           )
           .to(
             ".scroll-indicator",
             { y: 0, opacity: 1, duration: 0.8, ease: "power2.out" },
-            "-=0.5"
+            "-=0.5",
           );
       };
 
@@ -71,18 +71,18 @@ export default function Hero({ data = {} }) {
           window.removeEventListener("page-transition-complete", runAnimation);
       }
     },
-    { scope: containerRef, dependencies: [data] }
+    { scope: containerRef, dependencies: [data] },
   );
 
   return (
     <section
       ref={containerRef}
-      className="h-screen w-full flex flex-col justify-center items-center px-4 md:px-12 bg-dark-background relative overflow-hidden"
+      className="h-[calc(100vh-6rem)] lg:h-screen w-full flex flex-col justify-center items-center px-4 md:px-12 bg-dark-background relative overflow-hidden"
     >
       {/* Background gradients */}
       <div className="absolute top-0 right-0 w-[50vw] h-[50vh] bg-primary/10 rounded-full blur-[120px] pointer-events-none translate-x-1/4 -translate-y-1/4"></div>
 
-      <div className="relative z-10 w-full max-w-[1600px] mx-auto flex-1 flex flex-col justify-center items-center">
+      <div className="relative z-10 w-full max-w-[1600px] mx-auto flex flex-col justify-center items-center">
         {/* Main Heading - Centered Stack */}
         <div className="flex flex-col items-center leading-[0.9] mt-0 text-center">
           {/* Line 1 */}
@@ -103,12 +103,12 @@ export default function Hero({ data = {} }) {
           <div className="relative">
             <h1
               className="hero-text inline-block text-[15vw] md:text-[12vw] font-black font-syne text-transparent uppercase tracking-tighter hover:text-white/10 transition-colors duration-500 cursor-default"
-              style={{ WebkitTextStroke: "2px rgba(255, 255, 255, 0.3)" }}
+              style={{ WebkitTextStroke: "1px rgba(255, 255, 255, 0.3)" }}
             >
               {headingLines[2]}
             </h1>
             {/* Decal Icon */}
-            <div className="hero-icon absolute -bottom-4 md:-bottom-8 right-0 md:-right-24 pointer-events-none text-white mix-blend-difference group flex items-center justify-center">
+            <div className="hero-icon absolute -bottom-8 right-0 md:-right-24 pointer-events-none text-white mix-blend-difference group flex items-center justify-center">
               {getIcon(data?.decalIcon)}
             </div>
           </div>

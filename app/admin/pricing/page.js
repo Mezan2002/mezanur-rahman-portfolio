@@ -70,7 +70,7 @@ export default function PricingPage() {
   }, [loading, plans]);
 
   const filteredPlans = plans.filter((plan) =>
-    plan.name.toLowerCase().includes(searchTerm.toLowerCase())
+    plan.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -169,7 +169,7 @@ export default function PricingPage() {
                     {plan.name}
                   </h3>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-5xl font-black font-syne text-white">
+                    <span className="text-3xl lg:text-5xl font-black font-syne text-white">
                       {plan.price === "Custom" ? plan.price : `$${plan.price}`}
                     </span>
                     {plan.billingPeriod && (

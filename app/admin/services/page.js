@@ -70,7 +70,7 @@ export default function ServicesPage() {
   }, [loading, services]);
 
   const filteredServices = services.filter((service) =>
-    service.title.toLowerCase().includes(searchTerm.toLowerCase())
+    service.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const getIcon = (iconName) => {
@@ -175,7 +175,7 @@ export default function ServicesPage() {
                 </div>
 
                 <div>
-                  <h3 className="text-3xl font-black font-syne text-white uppercase mb-4 tracking-tight group-hover:text-primary transition-colors">
+                  <h3 className="text-2xl lg:text-3xl font-black font-syne text-white uppercase mb-4 tracking-tight group-hover:text-primary transition-colors">
                     {service.title}
                   </h3>
                   <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors line-clamp-3">
