@@ -3,19 +3,22 @@
 import {
   getBlogs,
   getMe,
+  getPricing,
   getProjects,
+  getServices,
+  getSkills,
   getTestimonials,
-  getUsers,
 } from "@/lib/api";
 import gsap from "gsap";
 import {
   ArrowRight,
   Clock,
   Cpu,
+  DollarSign,
   FileText,
   Globe,
   Plus,
-  Users,
+  Wrench,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -28,7 +31,9 @@ export default function AdminDashboard() {
     blogs: 0,
     projects: 0,
     testimonials: 0,
-    users: 0,
+    services: 0,
+    pricing: 0,
+    skills: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -39,29 +44,50 @@ export default function AdminDashboard() {
         // 1. Fetch User
         const storedUser = localStorage.getItem("user");
         if (storedUser && storedUser !== "undefined") {
-          setUser(JSON.parse(storedUser));
+          try {
+            setUser(JSON.parse(storedUser));
+          } catch (e) {
+            console.error("Dashboard: Failed to parse stored user", e);
+          }
         }
-        const userRes = await getMe();
-        if (userRes.success) {
-          const userData = userRes.data?.user || userRes.data;
-          setUser(userData);
-          localStorage.setItem("user", JSON.stringify(userData));
+
+        try {
+          const userRes = await getMe();
+          if (userRes.success) {
+            const userData = userRes.data?.user || userRes.data;
+            setUser(userData);
+            localStorage.setItem("user", JSON.stringify(userData));
+          }
+        } catch (err) {
+          console.warn("Dashboard: Profile sync failed (Backend issue)", err);
+          // Don't throw here, allow stats to load anyway
         }
 
         // 2. Fetch Stats
-        const [blogsRes, projectsRes, testimonialsRes, usersRes] =
-          await Promise.all([
-            getBlogs(),
-            getProjects(),
-            getTestimonials(),
-            getUsers(),
-          ]);
+        const [
+          blogsRes,
+          projectsRes,
+          testimonialsRes,
+          servicesRes,
+          pricingRes,
+          skillsRes,
+        ] = await Promise.all([
+          getBlogs(),
+          getProjects(),
+          getTestimonials(),
+          getServices(),
+          getPricing(),
+          getSkills(),
+        ]);
 
         setStats({
-          blogs: blogsRes.data?.length || 0,
-          projects: projectsRes.data?.length || 0,
-          testimonials: testimonialsRes.data?.length || 0,
-          users: usersRes.data?.length || 0,
+          blogs: blogsRes.data?.length || blogsRes.length || 0,
+          projects: projectsRes.data?.length || projectsRes.length || 0,
+          testimonials:
+            testimonialsRes.data?.length || testimonialsRes.length || 0,
+          services: servicesRes.data?.length || servicesRes.length || 0,
+          pricing: pricingRes.data?.length || pricingRes.length || 0,
+          skills: skillsRes.data?.length || skillsRes.length || 0,
         });
       } catch (err) {
         console.error("Dashboard: Data fetch failed", err);
@@ -148,7 +174,7 @@ export default function AdminDashboard() {
       {/* Bento Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-auto gap-4">
         {/* STAT 1: Total Blogs (Large) - Col 1-2 */}
-        <div className="bento-item col-span-1 md:col-span-2 row-span-1 bg-dark-background border border-white/5 rounded-3xl p-8 relative overflow-hidden group hover:border-white/10 transition-colors">
+        <div className="bento-item col-span-1 md:col-span-2 row-span-1 bg-dark-background border border-white/5 rounded-3xl p-8 relative overflow-hidden group hover:border-white/10 transition-colors flex flex-col justify-center">
           <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
             <FileText size={100} />
           </div>
@@ -183,19 +209,19 @@ export default function AdminDashboard() {
           </span>
         </Link>
 
-        {/* STAT 2: Views (Tall) - Col 4 Row 1-2 */}
+        {/* STAT 2: Services (Tall) - Col 4 Row 1-2 */}
         <div className="bento-item col-span-1 md:col-span-1 row-span-2 bg-linear-to-b from-[#0a0a0a] to-black border border-white/5 rounded-3xl p-8 flex flex-col justify-between group hover:border-white/10 transition-colors">
           <div>
             <div className="flex justify-between items-start mb-6">
               <div className="p-3 rounded-xl bg-white/5 text-white group-hover:bg-white group-hover:text-black transition-colors">
-                <Users size={20} />
+                <Wrench size={20} />
               </div>
             </div>
             <div className="text-4xl font-black font-syne text-white mb-2">
-              {loading ? "..." : stats.users}
+              {loading ? "..." : stats.services}
             </div>
             <div className="text-gray-500 text-xs font-mono uppercase tracking-widest">
-              Total Users
+              Total Services
             </div>
           </div>
 
@@ -251,23 +277,87 @@ export default function AdminDashboard() {
 
         {/* QUICK LINK - Col 3 Row 2 */}
         <Link
-          href="/admin/users"
-          className="bento-item col-span-1 md:col-span-1 row-span-1 bg-dark-background border border-white/5 rounded-3xl p-8 relative overflow-hidden group hover:border-white/10 transition-colors block"
+          href="/admin/pricing"
+          className="bento-item col-span-1 md:col-span-1 row-span-1 bg-dark-background border border-white/5 rounded-3xl p-8 relative overflow-hidden group hover:border-white/10 transition-colors flex flex-col justify-center"
         >
-          <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
-            <Globe size={100} />
+          <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-100 transition-opacity">
+            <DollarSign size={100} className="text-primary" />
           </div>
           <div className="relative z-10">
             <div className="text-gray-500 text-xs font-mono uppercase tracking-widest mb-2">
-              Management
+              Revenue
             </div>
             <div className="flex items-center justify-between">
               <div className="text-xl font-black font-syne text-white uppercase">
-                Users
+                Pricing
               </div>
               <ArrowRight
                 size={20}
                 className="text-primary group-hover:translate-x-2 transition-transform"
+              />
+            </div>
+          </div>
+        </Link>
+
+        {/* SKILLS WIDGET - Col 1-2 Row 3 */}
+        <div className="bento-item col-span-1 md:col-span-2 row-span-1 bg-[#0a0a0a] border border-white/5 rounded-3xl p-6 relative overflow-hidden group hover:border-white/10 transition-colors flex flex-col justify-center">
+          <div className="flex items-center justify-between relative z-10">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10">
+                <Globe size={20} className="text-primary" />
+              </div>
+              <div>
+                <h3 className="text-white font-bold font-syne uppercase text-sm">
+                  Tech Stack
+                </h3>
+                <p className="text-gray-500 text-[10px] font-mono uppercase tracking-wider">
+                  Configured Skills
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-3xl font-black font-syne text-white">
+                {loading ? "..." : stats.skills}
+              </p>
+              <Link
+                href="/admin/skills"
+                className="text-[10px] text-primary uppercase font-mono tracking-widest hover:underline"
+              >
+                Manage Stack
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <Link
+          href="/admin/projects"
+          className="bento-item col-span-1 md:col-span-2 row-span-1 bg-dark-background border border-white/5 rounded-3xl p-6 relative group hover:border-white/10 transition-colors overflow-hidden flex flex-col justify-center"
+        >
+          <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="flex items-center justify-between relative z-10">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10">
+                <Plus
+                  size={20}
+                  className="text-white group-hover:text-primary transition-colors"
+                />
+              </div>
+              <div>
+                <h3 className="text-white font-bold font-syne uppercase text-sm">
+                  Portfolio
+                </h3>
+                <p className="text-gray-500 text-[10px] font-mono uppercase tracking-wider">
+                  Active Projects
+                </p>
+              </div>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <p className="text-3xl font-black font-syne text-white">
+                {loading ? "..." : stats.projects}
+              </p>
+              <ArrowRight
+                size={16}
+                className="text-gray-600 group-hover:text-primary group-hover:translate-x-1 transition-all"
               />
             </div>
           </div>
