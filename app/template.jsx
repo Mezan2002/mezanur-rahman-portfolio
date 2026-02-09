@@ -11,6 +11,7 @@ export default function Template({ children }) {
     () => {
       const tl = gsap.timeline({
         onComplete: () => {
+          window.isPageReady = true;
           window.dispatchEvent(new CustomEvent("page-transition-complete"));
           // Ensure container is visible
           gsap.set(".page-content", { visibility: "visible" });

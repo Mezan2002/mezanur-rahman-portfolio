@@ -136,8 +136,8 @@ export default function Projects({ data = {} }) {
             [1, 2].map((i) => (
               <div
                 key={i}
-                className={`h-[400px] bg-white/5 rounded-sm animate-pulse ${
-                  i % 2 !== 0 ? "" : "md:mt-20"
+                className={`h-[400px] bg-white/5 rounded-sm animate-pulse mb-5 lg:mb-0 ${
+                  i % 2 !== 0 ? "" : "md:mt-48"
                 }`}
               ></div>
             ))
@@ -149,8 +149,8 @@ export default function Projects({ data = {} }) {
             projects.map((project, index) => (
               <div
                 key={project._id || project.id}
-                className={`project-grid-item mt-5 lg:mt-0 group relative ${
-                  index % 2 !== 0 ? "md:mt-20" : ""
+                className={`project-grid-item mb-5 lg:mb-0 group relative ${
+                  index % 2 !== 0 ? "md:mt-64" : ""
                 }`}
               >
                 <Link
