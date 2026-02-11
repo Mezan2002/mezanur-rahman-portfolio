@@ -20,6 +20,30 @@ You can start editing the page by modifying `app/page.js`. The page auto-updates
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+---
+
+## ⭐ Key Features
+
+This project consists of two main parts: a high-end portfolio for public display and a comprehensive admin dashboard for management.
+
+### 🌐 Public Portfolio
+
+- **GSAP & Locomotive Scroll**: Ultra-smooth animations and kinetic scrolling experience.
+- **Advanced Cursor System**: Multi-variant toggles (Emoji, Premium, Glow, Crosshair) with interactive sound effects.
+- **Multi-Page Experience**: Dedicated pages for About (Editorial), Blog (Journal), Work (Floating Previews), Contact (Creative Form), and Testimonials (Masonry).
+- **Responsive & Premium**: optimized for all devices with high-end dark-mode aesthetics and noise overlays.
+
+### 🛠️ Admin Dashboard
+
+- **Content Management**: Manage blogs (Newsroom), projects, services, and pricing without code.
+- **Rich Text Editor**: Advanced blog authoring with Tiptap integration.
+- **Bento Overview**: Modern dashboard with real-time stats and system health monitoring.
+- **Cloudinary Integrated**: Seamless image management and hosting.
+
+For a full list of features, check out the [Feature Breakdown](docs/feature_breakdown.md).
+
+---
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
