@@ -143,7 +143,7 @@ export default function BlogDetails() {
         </header>
 
         {/* Cover Image */}
-        <div className="w-full aspect-[21/9] relative rounded-2xl overflow-hidden mb-16 blog-reveal border border-white/10">
+        <div className="w-full aspect-21/9 relative rounded-2xl overflow-hidden mb-16 blog-reveal border border-white/10">
           <Image
             src={
               blog.featuredImage ||
@@ -152,7 +152,7 @@ export default function BlogDetails() {
             }
             alt={blog.title}
             fill
-            className="object-cover"
+            className="object-contain"
             priority
             unoptimized
           />
