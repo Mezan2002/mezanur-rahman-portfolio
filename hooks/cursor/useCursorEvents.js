@@ -1,5 +1,5 @@
 // hooks/useCursorEvents.js
-import { CELEBRATION_EMOJIS, DEFAULT_EMOJI } from "@/config/cursorConfig";
+import { DEFAULT_EMOJI } from "@/config/cursorConfig";
 import { useCallback } from "react";
 
 export function useCursorEvents({
@@ -28,7 +28,7 @@ export function useCursorEvents({
       playSound("hover");
       animateHover();
     },
-    [getEmojiForElement, playSound, animateHover, setEmoji, setIsHovering]
+    [getEmojiForElement, playSound, animateHover, setEmoji, setIsHovering],
   );
 
   const handleMouseLeave = useCallback(() => {
@@ -38,7 +38,7 @@ export function useCursorEvents({
   }, [animateLeave, setEmoji, setIsHovering]);
 
   const handleMouseDown = useCallback(() => {
-    setEmoji("👇");
+    setEmoji("click");
     setIsClicking(true);
     animateDown();
   }, [animateDown, setEmoji, setIsClicking]);
@@ -46,7 +46,7 @@ export function useCursorEvents({
   const handleMouseUp = useCallback(() => {
     const element = document.elementFromPoint(
       mousePos.current.x,
-      mousePos.current.y
+      mousePos.current.y,
     );
     setEmoji(isHovering ? getEmojiForElement(element) : DEFAULT_EMOJI);
     setIsClicking(false);
@@ -66,16 +66,11 @@ export function useCursorEvents({
       setShowRipple(true);
       playSound("click");
 
-      const randomEmoji =
-        CELEBRATION_EMOJIS[
-          Math.floor(Math.random() * CELEBRATION_EMOJIS.length)
-        ];
-      setEmoji(randomEmoji);
-
+      setEmoji("click");
       setTimeout(() => {
         const element = document.elementFromPoint(
           mousePos.current.x,
-          mousePos.current.y
+          mousePos.current.y,
         );
         setEmoji(isHovering ? getEmojiForElement(element) : DEFAULT_EMOJI);
       }, 300);
@@ -92,18 +87,18 @@ export function useCursorEvents({
       setEmoji,
       setRipplePos,
       setShowRipple,
-    ]
+    ],
   );
 
   const handleDoubleClick = useCallback(() => {
     playSound("doubleclick");
-    setEmoji("💝");
+    setEmoji("click");
     animateDoubleClick(isHovering);
 
     setTimeout(() => {
       const element = document.elementFromPoint(
         mousePos.current.x,
-        mousePos.current.y
+        mousePos.current.y,
       );
       setEmoji(isHovering ? getEmojiForElement(element) : DEFAULT_EMOJI);
     }, 700);
@@ -118,7 +113,7 @@ export function useCursorEvents({
 
   const handleScroll = useCallback(() => {
     if (!isHovering) {
-      setEmoji("📜");
+      setEmoji("pointer");
 
       if (window.scrollTimeout) {
         clearTimeout(window.scrollTimeout);
@@ -133,18 +128,18 @@ export function useCursorEvents({
   const handleContextMenu = useCallback(
     (e) => {
       e.preventDefault();
-      setEmoji("🤔");
+      setEmoji("pointer");
       playSound("hover");
 
       setTimeout(() => {
         const element = document.elementFromPoint(
           mousePos.current.x,
-          mousePos.current.y
+          mousePos.current.y,
         );
         setEmoji(isHovering ? getEmojiForElement(element) : DEFAULT_EMOJI);
       }, 500);
     },
-    [isHovering, getEmojiForElement, playSound, mousePos, setEmoji]
+    [isHovering, getEmojiForElement, playSound, mousePos, setEmoji],
   );
 
   return {

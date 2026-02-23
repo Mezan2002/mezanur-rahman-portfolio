@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 // components/CustomCursor.jsx
 "use client";
 
@@ -133,7 +134,7 @@ const CustomCursor = memo(() => {
     window.addEventListener("contextmenu", handleContextMenu);
 
     const interactiveElements = document.querySelectorAll(
-      INTERACTIVE_SELECTORS
+      INTERACTIVE_SELECTORS,
     );
 
     interactiveElements.forEach((el) => {
