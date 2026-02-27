@@ -1,3 +1,4 @@
+import AIChatbot from "@/components/AIChatbot";
 import ClientLayout from "@/components/ClientLayout";
 import CustomCursor from "@/components/cursor/CustomCursor";
 import { Montserrat, Syne } from "next/font/google"; // Import Syne
@@ -26,6 +27,7 @@ export default function RootLayout({ children }) {
       <body className={montserrat.className}>
         <CustomCursor />
         <ClientLayout>{children}</ClientLayout>
+        <AIChatbot />
       </body>
     </html>
   );

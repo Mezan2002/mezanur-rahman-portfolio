@@ -361,27 +361,27 @@ section {
 }
 
 .animate-marquee {
-  animation: marquee 25s linear infinite;
+  animation: marquee 100s linear infinite;
 }
 
 .animate-marquee2 {
-  animation: marquee2 25s linear infinite;
+  animation: marquee2 100s linear infinite;
 }
 
 .animate-marquee-slow {
-  animation: marquee 40s linear infinite;
+  animation: marquee 200s linear infinite;
 }
 
 .animate-marquee2-slow {
-  animation: marquee2 40s linear infinite;
+  animation: marquee2 200s linear infinite;
 }
 
 .animate-marquee-super-slow {
-  animation: marquee 80s linear infinite;
+  animation: marquee 400s linear infinite;
 }
 
 .animate-marquee2-super-slow {
-  animation: marquee2 80s linear infinite;
+  animation: marquee2 400s linear infinite;
 }
 
 .animate-spin-slow {

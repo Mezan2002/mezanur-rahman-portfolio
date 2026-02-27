@@ -4,7 +4,15 @@ import ImageUploader from "@/components/admin/ImageUploader";
 import TiptapEditor from "@/components/admin/TiptapEditor";
 import { getCategories } from "@/lib/api";
 import gsap from "gsap";
-import { ArrowLeft, Loader2, Save, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Image as ImageIcon,
+  Loader2,
+  Save,
+  Sparkles,
+  Wand2,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
@@ -18,20 +26,20 @@ export default function BlogForm({
   // Form States
   const [title, setTitle] = useState(initialData.title || "");
   const [category, setCategory] = useState(
-    initialData.category?._id || initialData.category || ""
+    initialData.category?._id || initialData.category || "",
   );
   const [content, setContent] = useState(initialData.content || "");
   const [tags, setTags] = useState(
     Array.isArray(initialData.tags)
       ? initialData.tags.join(", ")
-      : initialData.tags || ""
+      : initialData.tags || "",
   );
   const [excerpt, setExcerpt] = useState(initialData.excerpt || "");
   const [readTimeManual, setReadTimeManual] = useState(
-    initialData.readTime || ""
+    initialData.readTime || "",
   );
   const [featuredImage, setFeaturedImage] = useState(
-    initialData.featuredImage || ""
+    initialData.featuredImage || "",
   );
   const [status, setStatus] = useState(initialData.status || "draft");
 
@@ -39,6 +47,11 @@ export default function BlogForm({
   const [categories, setCategories] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+
+  // AI States
+  const [aiTopic, setAiTopic] = useState("");
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [isGeneratingImageAI, setIsGeneratingImageAI] = useState(false);
 
   // Populate form when initialData changes (vital for edit mode async fetch)
   useEffect(() => {
@@ -49,7 +62,7 @@ export default function BlogForm({
       setTags(
         Array.isArray(initialData.tags)
           ? initialData.tags.join(", ")
-          : initialData.tags || ""
+          : initialData.tags || "",
       );
       setExcerpt(initialData.excerpt || "");
       setReadTimeManual(initialData.readTime || "");
@@ -141,6 +154,61 @@ export default function BlogForm({
     }
   };
 
+  const handleGenerateAI = async () => {
+    if (!aiTopic) {
+      setError("Please enter a topic for AI generation.");
+      return;
+    }
+
+    setIsGeneratingAI(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/ai/generate-blog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic: aiTopic }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.message || "AI failed");
+
+      setTitle(data.title);
+      setExcerpt(data.excerpt);
+      setContent(data.content);
+      setTags(data.tags.join(", "));
+      setReadTimeManual(data.readTime);
+    } catch (err) {
+      setError(err.message || "Failed to generate blog content");
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
+
+  const handleGenerateImageAI = async () => {
+    setIsGeneratingImageAI(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/ai/generate-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, topic: aiTopic }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.message || "AI failed");
+
+      setFeaturedImage(data.imageUrl);
+    } catch (err) {
+      setError(err.message || "Failed to generate image");
+    } finally {
+      setIsGeneratingImageAI(false);
+    }
+  };
+
   return (
     <div ref={containerRef} className="pb-40 min-h-screen">
       {/* Header Actions */}
@@ -212,6 +280,63 @@ export default function BlogForm({
 
       {/* Editor Layout */}
       <div className="space-y-12">
+        {/* AI Generator Section */}
+        <div className="animate-in bg-white/5 border border-white/10 rounded-3xl p-6 md:p-8 backdrop-blur-md relative overflow-hidden group/ai">
+          <div className="absolute top-0 right-0 p-8 opacity-10 group-hover/ai:opacity-20 transition-opacity">
+            <Sparkles size={80} className="text-primary rotate-12" />
+          </div>
+
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-primary/20 rounded-xl">
+                <Wand2 size={20} className="text-primary" />
+              </div>
+              <h3 className="font-syne font-bold text-xl uppercase tracking-wider">
+                Magic AI Generator
+              </h3>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <input
+                  type="text"
+                  placeholder="What should this blog be about? (e.g. Modern Web Design Trends)"
+                  value={aiTopic}
+                  onChange={(e) => setAiTopic(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder-gray-500 outline-none focus:border-primary/50 transition-colors"
+                />
+                <span className="absolute -top-2 left-4 px-2 bg-black text-[10px] font-mono uppercase tracking-widest text-gray-400">
+                  Topic or Theme
+                </span>
+              </div>
+              <button
+                onClick={handleGenerateAI}
+                disabled={isGeneratingAI || !aiTopic}
+                className="px-8 py-4 bg-white text-black font-bold font-syne uppercase tracking-wider rounded-2xl hover:bg-primary transition-all disabled:opacity-50 flex items-center justify-center gap-2 group/btn active:scale-95"
+              >
+                {isGeneratingAI ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    <span>Writing story...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Generate Post</span>
+                    <Sparkles
+                      size={18}
+                      className="group-hover/btn:animate-pulse"
+                    />
+                  </>
+                )}
+              </button>
+            </div>
+            <p className="mt-4 text-xs text-gray-500 font-mono italic">
+              AI will generate title, excerpt, tags, and full rich-text content
+              for you.
+            </p>
+          </div>
+        </div>
+
         {/* Title Input */}
         <div className="animate-in group relative">
           <input
@@ -311,12 +436,33 @@ export default function BlogForm({
             <label className="text-xs font-mono uppercase tracking-widest text-gray-600 mb-4 block group-hover:text-primary transition-colors">
               Featured Cover Visual
             </label>
-            <div className="overflow-hidden rounded-none border-b border-white/5 pb-8 group-hover:border-primary/20 transition-colors">
+            <div className="overflow-hidden rounded-none border-b border-white/5 pb-8 group-hover:border-primary/20 transition-colors relative">
               <ImageUploader
                 value={featuredImage}
                 onChange={setFeaturedImage}
-                className="w-full aspect-[21/9]" // Cinematic aspect ratio
+                className="w-full aspect-21/9" // Cinematic aspect ratio
               />
+
+              {/* AI Image Generation Overlay */}
+              <div className="absolute top-4 right-4 z-10">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleGenerateImageAI();
+                  }}
+                  disabled={isGeneratingImageAI}
+                  className="flex items-center gap-2 px-4 py-2 bg-black/80 hover:bg-primary hover:text-black border border-white/10 rounded-full backdrop-blur-md transition-all text-[10px] font-bold uppercase tracking-wider group/img-ai active:scale-95"
+                >
+                  {isGeneratingImageAI ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <ImageIcon size={14} />
+                  )}
+                  <span>
+                    {isGeneratingImageAI ? "Dreaming..." : "AI Generate Image"}
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -1,4 +1,5 @@
 "use client";
+import { useEffect } from "react";
 
 import { Color } from "@tiptap/extension-color";
 import Highlight from "@tiptap/extension-highlight";
@@ -266,6 +267,13 @@ const TiptapEditor = ({ content, onChange }) => {
     },
     immediatelyRender: false,
   });
+
+  // Update editor content when content prop changes (e.g. from AI generation)
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content);
+    }
+  }, [content, editor]);
 
   return (
     <div className="relative group">

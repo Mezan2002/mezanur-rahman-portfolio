@@ -196,17 +196,32 @@ export default function BlogPreviewPage() {
 
         {/* Featured Image */}
         <figure className="w-full aspect-[21/9] rounded-3xl overflow-hidden animate-enter">
-          <Image
-            src={
+          {(() => {
+            const imgSrc =
               blog.featuredImage ||
               blog.image ||
-              "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"
+              "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop";
+            if (imgSrc.includes("http") || imgSrc.startsWith("data:")) {
+              return (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={imgSrc}
+                  alt={blog.title}
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000"
+                />
+              );
             }
-            alt={blog.title}
-            width={1920}
-            height={1080}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000"
-          />
+            return (
+              <Image
+                src={imgSrc}
+                alt={blog.title}
+                width={1920}
+                height={1080}
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000"
+              />
+            );
+          })()}
         </figure>
 
         {/* Article Content */}

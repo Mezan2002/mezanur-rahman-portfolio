@@ -59,7 +59,7 @@ export default function ImageUploader({
         if (onUploadEnd) onUploadEnd();
       }
     },
-    [onChange, onUploadStart, onUploadEnd]
+    [onChange, onUploadStart, onUploadEnd],
   );
 
   const onDragOver = useCallback((e) => {
@@ -79,7 +79,7 @@ export default function ImageUploader({
       const file = e.dataTransfer.files?.[0];
       handleUpload(file);
     },
-    [handleUpload]
+    [handleUpload],
   );
 
   const onFileSelect = (e) => {
@@ -96,13 +96,24 @@ export default function ImageUploader({
     <div className={`w-full font-sans ${className}`}>
       {value ? (
         <div className="relative aspect-video w-full rounded-3xl overflow-hidden border border-white/10 bg-black/50 group">
-          <Image
-            src={value}
-            alt="Uploaded image"
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-            unoptimized
-          />
+          {String(value).includes("http") ||
+          String(value).startsWith("data:") ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={value}
+              alt="Blog cover"
+              referrerPolicy="no-referrer"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <Image
+              src={value}
+              alt="Uploaded image"
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              unoptimized
+            />
+          )}
 
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
             <button

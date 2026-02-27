@@ -71,7 +71,7 @@ export default function BlogsPage() {
   }, [loading, blogs]);
 
   const filteredBlogs = blogs.filter((blog) =>
-    blog.title.toLowerCase().includes(searchTerm.toLowerCase())
+    blog.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -142,17 +142,32 @@ export default function BlogsPage() {
                   className="relative w-full md:w-80 h-64 md:h-48 shrink-0 rounded-3xl overflow-hidden group/image"
                 >
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover/image:opacity-100 transition-opacity duration-500 z-10" />
-                  <Image
-                    src={
+                  {(() => {
+                    const imgSrc =
                       blog.image ||
                       blog.featuredImage ||
-                      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"
+                      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop";
+                    if (imgSrc.includes("http") || imgSrc.startsWith("data:")) {
+                      return (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={imgSrc}
+                          alt={blog.title}
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-cover transform scale-100 group-hover/image:scale-105 transition-transform duration-700"
+                        />
+                      );
                     }
-                    alt={blog.title}
-                    width={1200}
-                    height={800}
-                    className="w-full h-full object-cover transform scale-100 group-hover/image:scale-105 transition-transform duration-700"
-                  />
+                    return (
+                      <Image
+                        src={imgSrc}
+                        alt={blog.title}
+                        width={1200}
+                        height={800}
+                        className="w-full h-full object-cover transform scale-100 group-hover/image:scale-105 transition-transform duration-700"
+                      />
+                    );
+                  })()}
 
                   {/* Issue Number Overlay */}
                   <div className="absolute top-6 left-6 z-20">
@@ -186,7 +201,7 @@ export default function BlogsPage() {
 
                     <time className="text-xs text-gray-500 uppercase tracking-wider">
                       {new Date(
-                        blog.date || blog.publishedAt || Date.now()
+                        blog.date || blog.publishedAt || Date.now(),
                       ).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
